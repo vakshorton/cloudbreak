@@ -4,12 +4,16 @@ import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrapRunner;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.host.SimpleHostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.orchestrator.onhost.client.OnHostClient;
-import com.sequenceiq.cloudbreak.orchestrator.onhost.poller.*;
+import com.sequenceiq.cloudbreak.orchestrator.onhost.poller.AmbariRunBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.onhost.poller.ConsulRunBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.onhost.poller.ConsulRunUpscale;
+import com.sequenceiq.cloudbreak.orchestrator.onhost.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import org.slf4j.Logger;
@@ -24,20 +28,35 @@ import java.util.concurrent.Future;
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.ON_HOST;
 
 @Component
-public class OnHostOrchestrator extends SimpleHostOrchestrator {
+public class OnHostOrchestrator implements HostOrchestrator {
+
     public static final String PORT = "443";
     public static final int MAX_NODES = 5000;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OnHostOrchestrator.class);
 
+
+    private ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner;
+    private ExitCriteria exitCriteria;
+
     @Override
-    public void validateApiEndpoint(OrchestrationCredential cred) throws CloudbreakOrchestratorException {
-        return;
+    public void init(ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner, ExitCriteria exitCriteria) {
+        this.parallelOrchestratorComponentRunner = parallelOrchestratorComponentRunner;
+        this.exitCriteria = exitCriteria;
     }
+
+    public ParallelOrchestratorComponentRunner getParallelOrchestratorComponentRunner() {
+        return parallelOrchestratorComponentRunner;
+    }
+
+    protected ExitCriteria getExitCriteria() {
+        return exitCriteria;
+    }
+
 
     @Override
     public void runService(GatewayConfig gatewayConfig, Set<String> agents,
-            OrchestrationCredential cred, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+                           OrchestrationCredential cred, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
 
         Set<String> targets = new HashSet<>(agents);
         targets.add(gatewayConfig.getPrivateAddress());
