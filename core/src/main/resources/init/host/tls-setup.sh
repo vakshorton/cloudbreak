@@ -21,10 +21,15 @@ start_nginx() {
   ${sudopre} sudo ${sudocheck} systemctl enable nginx
 }
 
+untar_salt() {
+  ${sudopre} sudo ${sudocheck} tar -zxvf /tmp/salt.tar.gz -C /srv
+}
+
 setup_tls() {
   setup_cbclient_cert
   create_certificates
   start_nginx
+  untar_salt
 }
 
 main() {

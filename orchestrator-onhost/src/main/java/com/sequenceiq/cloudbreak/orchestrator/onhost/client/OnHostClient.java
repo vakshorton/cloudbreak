@@ -88,7 +88,7 @@ public class OnHostClient {
         return targets;
     }
 
-    public String getGatewayPrivateIp() {
+    private String getGatewayPrivateIp() {
         return gatewayConfig.getPrivateAddress();
     }
 

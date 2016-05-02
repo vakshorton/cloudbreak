@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processTemplateIntoString;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -10,6 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.inject.Inject;
 
@@ -84,6 +88,7 @@ public class TlsSetupService {
             waitForSsh(stack, publicIp, hostKeyVerifier, user, privateKeyLocation);
             setupTemporarySsh(ssh, publicIp, hostKeyVerifier, user, privateKeyLocation, stack.getCredential());
             uploadTlsSetupScript(orchestrator, ssh, publicIp, stack.getCredential());
+            uploadSaltConfig(orchestrator, ssh);
             executeTlsSetupScript(ssh);
             removeTemporarySShKey(ssh, user, stack.getCredential());
             downloadAndSavePrivateKey(stack, ssh);
@@ -109,7 +114,7 @@ public class TlsSetupService {
     }
 
     private void setupTemporarySsh(SSHClient ssh, String ip, HostKeyVerifier hostKeyVerifier, String user, String privateKeyLocation, Credential credential)
-        throws IOException {
+            throws IOException {
         LOGGER.info("Setting up temporary ssh...");
         ssh.addHostKeyVerifier(hostKeyVerifier);
         ssh.connect(ip, SSH_PORT);
@@ -151,6 +156,31 @@ public class TlsSetupService {
             InMemorySourceFile notAvFile = uploadParameterFile(notAv, "50x.json");
             ssh.newSCPFileTransfer().upload(notAvFile, "/tmp/50x.json");
             LOGGER.info("ngingx error page uploaded to /tmp/50x.json. Content: {}", notAv);
+        }
+    }
+
+    private void uploadSaltConfig(Orchestrator orchestrator, SSHClient ssh) throws CloudbreakException, IOException {
+        if (containerOrchestratorTypeResolver.resolveType(orchestrator.getType()).hostOrchestrator()) {
+            // TODO generate tar or zip on-the-fly
+            ByteArrayOutputStream byteArrayOutputStream = IOUtils.readFully(getClass().getResourceAsStream("/salt/salt.tar.gz"));
+            byte[] byteArray = byteArrayOutputStream.toByteArray();
+            LOGGER.info("Upload salt.tar.gz to /tmp/salt.tar.gz");
+            ssh.newSCPFileTransfer().upload(new InMemorySourceFile() {
+                @Override
+                public String getName() {
+                    return "salt.tar.gz";
+                }
+
+                @Override
+                public long getLength() {
+                    return byteArray.length;
+                }
+
+                @Override
+                public InputStream getInputStream() throws IOException {
+                    return new ByteArrayInputStream(byteArray);
+                }
+            }, "/tmp/salt.tar.gz");
         }
     }
 
