@@ -58,18 +58,8 @@ public class OnHostOrchestrator implements HostOrchestrator {
     public void runService(GatewayConfig gatewayConfig, Set<String> agents,
                            OrchestrationCredential cred, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
 
-        Set<String> targets = new HashSet<>(agents);
-        targets.add(gatewayConfig.getPrivateAddress());
-
         try {
-            OnHostClient onHostClient = new OnHostClient(gatewayConfig, targets, port());
-            SaltBootstrap saltBootstrap = new SaltBootstrap(onHostClient);
-            Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, getExitCriteria(), exitCriteriaModel);
-            Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
-            saltBootstrapRunnerFuture.get();
-
-
-            AmbariRunBootstrap ambariRunBootstrap = new AmbariRunBootstrap(onHostClient);
+            AmbariRunBootstrap ambariRunBootstrap = new AmbariRunBootstrap(gatewayConfig.getPublicAddress());
 
             Callable<Boolean> ambariRunBootstrapRunner = runner(ambariRunBootstrap, getExitCriteria(), exitCriteriaModel);
             Future<Boolean> ambariRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(ambariRunBootstrapRunner);
