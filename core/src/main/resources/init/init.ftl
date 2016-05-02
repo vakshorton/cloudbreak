@@ -21,7 +21,8 @@ adduser saltuser && usermod -G wheel saltuser && echo "saltuser:saltpass"| chpas
 
 if $IS_GATEWAY; then
   yum install -y salt-master salt-api
-  cd /etc/salt/ && curl -O https://raw.githubusercontent.com/akanto/salt-demo/master/salt-master/config/master
+  mkdir -p /etc/salt/master.d/
+  cd /etc/salt/master.d/ && curl -O https://raw.githubusercontent.com/akanto/salt-demo/master/salt-master/config/custom.conf
 fi
 
 yum install -y salt-minion

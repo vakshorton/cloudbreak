@@ -33,10 +33,7 @@ public class OnHostClient {
 
     private enum OnHostClientEndpoint {
         INFO("health"),
-        AMBARI_RUN_DISTRIBUTE("ambari/run/distribute"),
-        SALT_RUN_DISTRIBUTE("salt/run/distribute"),
-        CONSUL_RUN_DISTRIBUTE("consul/run/distribute"),
-        CONSUL_CONFIG_DISTRIBUTE("consul/config/distribute");
+        SALT_RUN_DISTRIBUTE("salt/run/distribute");
 
         private String url;
 
@@ -136,41 +133,6 @@ public class OnHostClient {
         return false;
     }
 
-    public Set<String> distributeConsulConfig(Set<String> targetIps) throws CloudbreakOrchestratorException {
-        Set<String> servers = new HashSet<>();
-        servers.add(getGatewayPrivateIp());
-        return distributeConsulConfig(servers, targetIps);
-    }
-
-    public Set<String> distributeConsulConfig(Set<String> servers, Set<String> targetIps) throws CloudbreakOrchestratorException {
-        Set<String> missingTargets = new HashSet<>();
-        // TODO replace it with object
-        Map<String, Object> configMap = new HashMap<>();
-        configMap.put("data_dir", "/etc/cloudbreak/consul");
-        // TODO multiple servers
-        if (!servers.isEmpty()) {
-            configMap.put("servers", servers);
-        }
-        configMap.put("targets", targetIps);
-        try {
-            LOGGER.info("Sending consul config save request to {}", targetIps);
-            ResponseEntity<CbBootResponses> response = exchange(configMap, HttpMethod.POST, port, OnHostClientEndpoint.CONSUL_CONFIG_DISTRIBUTE,
-                    CbBootResponses.class);
-            CbBootResponses responseBody = response.getBody();
-            for (CbBootResponse cbBootResponse : responseBody.getResponses()) {
-                if (cbBootResponse.getStatusCode() != HttpStatus.OK.value()) {
-                    LOGGER.info("Failed to distributed consul config to: " + cbBootResponse.getAddress());
-                    missingTargets.add(cbBootResponse.getAddress().split(":")[0]);
-                }
-            }
-            if (!missingTargets.isEmpty()) {
-                LOGGER.info("Missing nodes to save consul config: {}", missingTargets);
-            }
-        } catch (Exception e) {
-            throw new CloudbreakOrchestratorFailedException(e);
-        }
-        return missingTargets;
-    }
 
     public Set<String> startSaltServiceOnTargetMachines(Set<String> targetIps) throws CloudbreakOrchestratorException {
         Set<String> missingTargets = new HashSet<>();
@@ -183,8 +145,10 @@ public class OnHostClient {
             minions.add(minionConfig(getGatewayPrivateIp(), roles));
         }
         for (String minionIp : targetIps) {
-            String[] roles = {"consul_agent", "ambari_agent"};
-            minions.add(minionConfig(minionIp, roles));
+            if(!minionIp.equals(getGatewayPrivateIp())) {
+                String[] roles = {"consul_agent", "ambari_agent"};
+                minions.add(minionConfig(minionIp, roles));
+            }
         }
 
         map.put("minions", minions);
@@ -216,29 +180,5 @@ public class OnHostClient {
         return minion;
     }
 
-    public Set<String> startConsulServiceOnTargetMachines(Set<String> targetIps) throws CloudbreakOrchestratorException {
-        Set<String> missingTargets = new HashSet<>();
-        try {
-            Map<String, Object> consulRunMap = new HashMap<>();
-            consulRunMap.put("targets", targetIps);
-            ResponseEntity<CbBootResponses> response =
-                    exchange(consulRunMap, HttpMethod.POST, port, OnHostClientEndpoint.CONSUL_RUN_DISTRIBUTE, CbBootResponses.class);
-            CbBootResponses responseBody = response.getBody();
-            LOGGER.info("Consul run response: {}", responseBody);
-            for (CbBootResponse cbBootResponse : responseBody.getResponses()) {
-                if (cbBootResponse.getStatusCode() != HttpStatus.OK.value()) {
-                    LOGGER.info("Successfully distributed consul run to: " + cbBootResponse.getAddress());
-                    missingTargets.add(cbBootResponse.getAddress().split(":")[0]);
-                }
-            }
-            if (!missingTargets.isEmpty()) {
-                LOGGER.info("Missing nodes to run consul: {}", missingTargets);
-            }
-        } catch (Exception e) {
-            LOGGER.info("Error occured when ran consul on hosts: ", e);
-            throw new CloudbreakOrchestratorFailedException(e);
-        }
-        return missingTargets;
-    }
 
 }
