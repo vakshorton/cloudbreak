@@ -4,8 +4,8 @@ import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.onhost.client.OnHostClient;
 import com.sequenceiq.cloudbreak.orchestrator.onhost.salt.SaltConnection;
 import com.sequenceiq.cloudbreak.orchestrator.onhost.salt.SaltStates;
-import com.sequenceiq.cloudbreak.orchestrator.onhost.salt.target.Compound;
 import com.suse.salt.netapi.client.SaltClient;
+import com.suse.salt.netapi.datatypes.target.Glob;
 import com.suse.salt.netapi.exception.SaltException;
 
 public class AmbariRunBootstrap implements OrchestratorBootstrap {
@@ -20,8 +20,9 @@ public class AmbariRunBootstrap implements OrchestratorBootstrap {
 
     @Override
     public Boolean call() throws Exception {
-        SaltStates.ambariServer().callAsync(saltClient, new Compound("S@" + client.getGatewayPrivateIp()));
-        SaltStates.ambariAgent().callAsync(saltClient, new Compound("* and not S@" + client.getGatewayPrivateIp()));
+        //        SaltStates.ambariServer().callAsync(saltClient, new Compound("S@" + client.getGatewayPrivateIp()));
+        //        SaltStates.ambariAgent().callAsync(saltClient, new Compound("* and not S@" + client.getGatewayPrivateIp()));
+        SaltStates.highstate().callAsync(saltClient, Glob.ALL);
         return true;
     }
 }

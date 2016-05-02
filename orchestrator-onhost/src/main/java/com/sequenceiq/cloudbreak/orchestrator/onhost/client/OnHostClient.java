@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.orchestrator.onhost.client;
 
-import static java.util.Collections.EMPTY_SET;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import javax.net.ssl.SSLContext;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.onhost.domain.CbBootResponse;
+import com.sequenceiq.cloudbreak.orchestrator.onhost.domain.CbBootResponses;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.util.KeyStoreUtil;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
@@ -20,22 +19,14 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.onhost.domain.CbBootResponse;
-import com.sequenceiq.cloudbreak.orchestrator.onhost.domain.CbBootResponses;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
-import com.sequenceiq.cloudbreak.util.KeyStoreUtil;
+import javax.net.ssl.SSLContext;
+import java.util.*;
+
+import static java.util.Collections.EMPTY_SET;
 
 
 public class OnHostClient {
@@ -184,11 +175,20 @@ public class OnHostClient {
     public Set<String> startSaltServiceOnTargetMachines(Set<String> targetIps) throws CloudbreakOrchestratorException {
         Set<String> missingTargets = new HashSet<>();
         Map<String, Object> map = new HashMap<>();
-        Set<String> minions = new HashSet<>(targetIps);
-        if (minions.contains(getGatewayPrivateIp())) {
+        Set<String> minionsTargets = new HashSet<>(targetIps);
+        ArrayList<Map<String, Object>> minions = new ArrayList<>();
+        if (minionsTargets.contains(getGatewayPrivateIp())) {
             map.put("server", getGatewayPrivateIp());
+            String[] roles = {"consul_server", "ambari_server", "ambari_agent"};
+            minions.add(minionConfig(getGatewayPrivateIp(), roles));
         }
+        for (String minionIp : targetIps) {
+            String[] roles = {"consul_agent", "ambari_agent"};
+            minions.add(minionConfig(minionIp, roles));
+        }
+
         map.put("minions", minions);
+
         try {
             ResponseEntity<CbBootResponses> response = exchange(map, HttpMethod.POST, port, OnHostClientEndpoint.SALT_RUN_DISTRIBUTE, CbBootResponses.class);
             CbBootResponses responseBody = response.getBody();
@@ -209,6 +209,12 @@ public class OnHostClient {
         return missingTargets;
     }
 
+    private Map<String, Object> minionConfig(String address, String[] roles) {
+        Map<String, Object> minion = new HashMap<>();
+        minion.put("address", address);
+        minion.put("roles", roles);
+        return minion;
+    }
 
     public Set<String> startConsulServiceOnTargetMachines(Set<String> targetIps) throws CloudbreakOrchestratorException {
         Set<String> missingTargets = new HashSet<>();

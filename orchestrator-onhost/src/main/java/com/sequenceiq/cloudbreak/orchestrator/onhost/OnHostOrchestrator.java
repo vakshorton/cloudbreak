@@ -88,11 +88,10 @@ public class OnHostOrchestrator extends SimpleHostOrchestrator {
         OnHostClient onHostClient = new OnHostClient(gatewayConfig, prepareTargets(gatewayConfig, targets), port());
 
         try {
-            ConsulConfigDistributeBootstrap consulConfigDistributeBootstrap = new ConsulConfigDistributeBootstrap(onHostClient, onHostClient.getTargets());
-            Callable<Boolean> consulConfigDistributeBootstrapRunner = runner(consulConfigDistributeBootstrap, getExitCriteria(), exitCriteriaModel);
-            Future<Boolean> consulConfigDistributeBootstrapAppFuture = getParallelOrchestratorComponentRunner().submit(consulConfigDistributeBootstrapRunner);
-            consulConfigDistributeBootstrapAppFuture.get();
-
+            SaltBootstrap saltBootstrap = new SaltBootstrap(onHostClient);
+            Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, getExitCriteria(), exitCriteriaModel);
+            Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
+            saltBootstrapRunnerFuture.get();
 
             ConsulRunBootstrap consulRunBootstrap = new ConsulRunBootstrap(onHostClient);
             Callable<Boolean> consulRunBootstrapRunner = runner(consulRunBootstrap, getExitCriteria(), exitCriteriaModel);
@@ -118,10 +117,7 @@ public class OnHostOrchestrator extends SimpleHostOrchestrator {
         Set<String> strings = prepareTargets(gatewayConfig, targets);
         OnHostClient onHostClient = new OnHostClient(gatewayConfig, strings, port());
         try {
-            ConsulConfigDistributeBootstrap consulConfigDistributeUpscale = new ConsulConfigDistributeBootstrap(onHostClient, strings);
-            Callable<Boolean> consulConfigDistributeUpscaleRunner = runner(consulConfigDistributeUpscale, getExitCriteria(), exitCriteriaModel);
-            Future<Boolean> consulConfigDistributeUpscaleAppFuture = getParallelOrchestratorComponentRunner().submit(consulConfigDistributeUpscaleRunner);
-            consulConfigDistributeUpscaleAppFuture.get();
+
 
             ConsulRunUpscale consulRunUpscale = new ConsulRunUpscale(onHostClient, strings);
             Callable<Boolean> consulRunUpscaleRunner = runner(consulRunUpscale, getExitCriteria(), exitCriteriaModel);
