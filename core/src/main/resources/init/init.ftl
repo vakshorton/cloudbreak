@@ -39,7 +39,7 @@ yum install -y salt-minion
 usermod -a -G root centos || :
 chmod 555 /
 
-curl -Lo /usr/sbin/cloudbreak-bootstrap https://dl.dropboxusercontent.com/u/16444381/cloudbreak-bootstrap && chmod +x /usr/sbin/cloudbreak-bootstrap
+curl -Lo /usr/sbin/cloudbreak-bootstrap https://dl.dropboxusercontent.com/u/13919958/cloudbreak-bootstrap && chmod +x /usr/sbin/cloudbreak-bootstrap
 curl -Lo /usr/sbin/consul https://dl.dropboxusercontent.com/u/13919958/consul && chmod +x /usr/sbin/consul
 
 curl -Lo /etc/systemd/system/cloudbreak-bootstrap.service https://gist.githubusercontent.com/keyki/1760f6c9b4e00829a18c7876fe4b2fc5/raw/cloudbreak-bootstrap.service

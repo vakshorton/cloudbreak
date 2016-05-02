@@ -4,7 +4,6 @@ import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processT
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -12,8 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import javax.inject.Inject;
 
@@ -114,7 +111,7 @@ public class TlsSetupService {
     }
 
     private void setupTemporarySsh(SSHClient ssh, String ip, HostKeyVerifier hostKeyVerifier, String user, String privateKeyLocation, Credential credential)
-            throws IOException {
+        throws IOException {
         LOGGER.info("Setting up temporary ssh...");
         ssh.addHostKeyVerifier(hostKeyVerifier);
         ssh.connect(ip, SSH_PORT);
