@@ -127,7 +127,7 @@ public class OnHostClient {
     }
 
     private <T extends Class> ResponseEntity exchange(HttpMethod method, String port, OnHostClientEndpoint onHostClientEndpoint, T clazz) throws Exception {
-        return exchange(new HashMap<>(), method, port, onHostClientEndpoint, clazz);
+        return exchange(new HashMap<String, Object>(), method, port, onHostClientEndpoint, clazz);
     }
 
 
