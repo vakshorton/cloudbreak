@@ -19,13 +19,13 @@ base:
     - match: grain
     - smartsense
 
+  'G@recipes:post and G@roles:knox_ldap':
+    - match: compound
+    - ldap.knox
+
   'recipes:pre':
     - match: grain
     - pre-recipes
-
-  'G@recipes:post and G@roles:knox_gateway':
-    - match: compound
-    - ldap
 
   'recipes:post':
     - match: grain
