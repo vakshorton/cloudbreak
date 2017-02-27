@@ -53,6 +53,9 @@ public class ClusterRequest {
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.ENABLE_KNOX_GATEWAY)
     private Boolean enableKnoxGateway = Boolean.FALSE;
 
+    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.GATEWAY_TYPE)
+    private GatewayType gatewayType = GatewayType.INDIVIDUAL;
+
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.KNOX_TOPOLOGY_NAME)
     private String knoxTopologyName;
 
@@ -183,6 +186,14 @@ public class ClusterRequest {
 
     public void setEnableKnoxGateway(Boolean enableKnoxGateway) {
         this.enableKnoxGateway = enableKnoxGateway;
+    }
+
+    public GatewayType getGatewayType() {
+        return gatewayType;
+    }
+
+    public void setGatewayType(GatewayType gatewayType) {
+        this.gatewayType = gatewayType;
     }
 
     public String getKnoxTopologyName() {

@@ -311,7 +311,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                 if (port.getExposedService().getServiceName().equals(componentDescriptor.getName())) {
                     String url;
                     if (cluster.getEnableKnoxGateway()) {
-                        url = String.format("https://%s:8443/gateway/%s%s", cluster.getAmbariIp(), cluster.getKnoxTopologyName(),
+                        url = String.format("/gateway/shared1/%s%s", cluster.getKnoxTopologyName(),
                                 port.getExposedService().getKnoxUrl());
                         if (exposedServices.contains(port.getExposedService().getKnoxService())) {
                             result.put(port.getExposedService().getPortName(), url);
@@ -333,7 +333,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                 url = String.format("http://%s:8080", cluster.getAmbariIp());
             } else {
                 if (cluster.getEnableKnoxGateway() != null && cluster.getEnableKnoxGateway()) {
-                    url = String.format("https://%s:8443/gateway/%s/ambari/", cluster.getAmbariIp(), cluster.getKnoxTopologyName());
+                    url = String.format("/gateway/shared1/%s/ambari/", cluster.getKnoxTopologyName());
                 } else {
                     url = String.format("https://%s/ambari/", cluster.getAmbariIp());
                 }

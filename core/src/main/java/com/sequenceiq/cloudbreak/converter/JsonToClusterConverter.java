@@ -14,8 +14,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerRequest;
+import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.FileSystemBase;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
@@ -90,7 +90,11 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
     private void convertKnox(ClusterRequest source, Cluster cluster) {
         cluster.setEnableKnoxGateway(source.getEnableKnoxGateway());
         if (Strings.isNullOrEmpty(source.getKnoxTopologyName())) {
-            cluster.setKnoxTopologyName(source.getName());
+            if ("shared1".equals(source.getName())) {
+                cluster.setKnoxTopologyName("services");
+            } else {
+                cluster.setKnoxTopologyName(source.getName());
+            }
         } else {
             cluster.setKnoxTopologyName(source.getKnoxTopologyName());
         }
