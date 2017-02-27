@@ -148,6 +148,11 @@ public class ClusterHostServiceRunner {
         gateway.put("username", cluster.getUserName());
         gateway.put("password", cluster.getPassword());
         gateway.put("topology", cluster.getGateway().getTopologyName());
+        if("shared1".equals(cluster.getName())){
+            gateway.put("ssoprovider", true);
+        } else {
+            gateway.put("ssoprovider", false);
+        }
 
         Json exposedJson = cluster.getGateway().getExposedServices();
         if (exposedJson != null && StringUtils.isNoneEmpty(exposedJson.getValue())) {

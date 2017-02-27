@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.init;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyRegister;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
 @Component
@@ -71,9 +73,13 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     @Inject
     private Flow2Handler flow2Handler;
 
+    @Inject
+    private ProxyRegister proxyRegister;
+
     public void onApplicationEvent(ContextRefreshedEvent event) {
         List<Long> stackIdsUnderOperation = restartDistruptedFlows();
         usageService.fixUsages();
+        proxyRegister.removeAll();
         List<Stack> stacksToSync = resetStackStatus(stackIdsUnderOperation);
         List<Cluster> clustersToSync = resetClusterStatus(stacksToSync, stackIdsUnderOperation);
         triggerSyncs(stacksToSync, clustersToSync);
@@ -102,7 +108,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     }
 
     private List<Cluster> resetClusterStatus(List<Stack> stacksToSync, List<Long> excludeStackIds) {
-        return clusterRepository.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS))
+        return clusterRepository.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS, AVAILABLE))
                 .stream().filter(c -> !excludeStackIds.contains(c.getStack().getId()))
                 .map(c -> {
                     loggingStatusChange("Cluster", c.getId(), c.getStatus(), WAIT_FOR_SYNC);

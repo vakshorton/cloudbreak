@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyRegister;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -64,6 +65,9 @@ public class ClusterServiceRunner {
     @Inject
     private GatewayConfigService gatewayConfigService;
 
+    @Inject
+    private ProxyRegister proxyRegister;
+
     public void runAmbariServices(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getById(stackId);
         Orchestrator orchestrator = stack.getOrchestrator();
@@ -90,6 +94,7 @@ public class ClusterServiceRunner {
             String gatewayIp = gatewayConfigService.getGatewayIp(stack);
             HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stack, gatewayIp);
             clusterService.updateAmbariClientConfig(cluster.getId(), ambariClientConfig);
+            proxyRegister.register(cluster.getName(), gatewayIp);
             Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
             for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
                 String groupName = instanceMetaData.getInstanceGroup().getGroupName();

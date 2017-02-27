@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyRegister;
 
 @Service
 public class ClusterTerminationFlowService {
@@ -43,8 +44,12 @@ public class ClusterTerminationFlowService {
     @Inject
     private FlowMessageService flowMessageService;
 
+    @Inject
+    private ProxyRegister proxyRegister;
+
     public void terminateCluster(ClusterContext context) {
         clusterService.updateClusterStatusByStackId(context.getStack().getId(), Status.DELETE_IN_PROGRESS);
+        proxyRegister.remove(context.getCluster().getName());
         LOGGER.info("Cluster delete started.");
     }
 
