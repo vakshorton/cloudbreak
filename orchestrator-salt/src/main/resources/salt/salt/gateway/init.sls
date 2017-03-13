@@ -15,47 +15,47 @@ knox:
 /usr/hdp/current/knox-server/conf/topologies/manager.xml:
   file.absent
 
-/usr/hdp/2.6.0.0-422/knox/lib/org/apache/hadoop/gateway/filter/rewrite/impl/UrlRewriteResponse.class:
+/usr/hdp/2.6.0.0-589/knox/lib/org/apache/hadoop/gateway/filter/rewrite/impl/UrlRewriteResponse.class:
   file.managed:
     - makedirs: True
     - source: salt://gateway/patch/UrlRewriteResponse.class
 
 patch-gateway-provider-rewrite:
   cmd.run:
-    - name: cd /usr/hdp/2.6.0.0-422/knox/lib/ && jar uf gateway-provider-rewrite-0.11.0.2.6.0.0-422.jar org/apache/hadoop/gateway/filter/rewrite/impl/UrlRewriteResponse.class && touch patched-gateway-provider-rewrite
-    - creates: /usr/hdp/2.6.0.0-422/knox/lib/patched-gateway-provider-rewrite
+    - name: cd /usr/hdp/2.6.0.0-589/knox/lib/ && jar uf gateway-provider-rewrite-0.12.0.2.6.0.0-589.jar org/apache/hadoop/gateway/filter/rewrite/impl/UrlRewriteResponse.class && touch patched-gateway-provider-rewrite
+    - creates: /usr/hdp/2.6.0.0-589/knox/lib/patched-gateway-provider-rewrite
 
-/usr/hdp/2.6.0.0-422/knox/lib/org/apache/hadoop/gateway/filter/XForwardedHeaderRequestWrapper.class:
+/usr/hdp/2.6.0.0-589/knox/lib/org/apache/hadoop/gateway/filter/XForwardedHeaderRequestWrapper.class:
   file.managed:
     - makedirs: True
     - source: salt://gateway/patch/XForwardedHeaderRequestWrapper.class
 
 patch-gateway-server-xforwarded-filter:
   cmd.run:
-    - name: cd /usr/hdp/2.6.0.0-422/knox/lib/ && jar uf gateway-server-xforwarded-filter-0.11.0.2.6.0.0-422.jar org/apache/hadoop/gateway/filter/XForwardedHeaderRequestWrapper.class && touch patch-gateway-server-xforwarded-filter
-    - creates: /usr/hdp/2.6.0.0-422/knox/lib/patch-gateway-server-xforwarded-filter
+    - name: cd /usr/hdp/2.6.0.0-589/knox/lib/ && jar uf gateway-server-xforwarded-filter-0.12.0.2.6.0.0-589.jar org/apache/hadoop/gateway/filter/XForwardedHeaderRequestWrapper.class && touch patch-gateway-server-xforwarded-filter
+    - creates: /usr/hdp/2.6.0.0-589/knox/lib/patch-gateway-server-xforwarded-filter
 
-/usr/hdp/2.6.0.0-422/knox/lib/applications/knoxauth/app/js/knoxauth.js:
+/usr/hdp/2.6.0.0-589/knox/lib/applications/knoxauth/app/js/knoxauth.js:
   file.managed:
     - makedirs: True
     - source: salt://gateway/patch/knoxauth.js
 
 patch-gateway-applications:
   cmd.run:
-    - name: cd /usr/hdp/2.6.0.0-422/knox/lib/ && jar uf gateway-applications-0.11.0.2.6.0.0-422.jar applications/knoxauth/app/js/knoxauth.js && touch patch-gateway-applications
-    - creates: /usr/hdp/2.6.0.0-422/knox/lib/patch-gateway-applications
+    - name: cd /usr/hdp/2.6.0.0-589/knox/lib/ && jar uf gateway-applications-0.12.0.2.6.0.0-589.jar applications/knoxauth/app/js/knoxauth.js && touch patch-gateway-applications
+    - creates: /usr/hdp/2.6.0.0-589/knox/lib/patch-gateway-applications
 
-/var/lib/knox/data-2.6.0.0-422/applications/knoxauth/app/js/knoxauth.js:
+/var/lib/knox/data-2.6.0.0-589/applications/knoxauth/app/js/knoxauth.js:
   file.managed:
     - source: salt://gateway/patch/knoxauth.js
 
-#/usr/hdp/2.6.0.0-422/knox/lib/gateway-provider-rewrite-0.11.0.2.6.0.0-422.jar:
+#/usr/hdp/2.6.0.0-589/knox/lib/gateway-provider-rewrite-0.12.0.2.6.0.0-589.jar:
 #  file.managed:
-#    - source: salt://gateway/patch/gateway-provider-rewrite-0.11.0.2.6.0.0-422.jar
+#    - source: salt://gateway/patch/gateway-provider-rewrite-0.12.0.2.6.0.0-589.jar
 
-#/usr/hdp/2.6.0.0-422/knox/lib/gateway-server-xforwarded-filter-0.11.0.2.6.0.0-422.jar:
+#/usr/hdp/2.6.0.0-589/knox/lib/gateway-server-xforwarded-filter-0.12.0.2.6.0.0-589.jar:
 #  file.managed:
-#    - source: salt://gateway/patch/gateway-server-xforwarded-filter-0.11.0.2.6.0.0-422.jar
+#    - source: salt://gateway/patch/gateway-server-xforwarded-filter-0.12.0.2.6.0.0-589.jar
 
 knox-master-secret:
   cmd.run:
