@@ -41,7 +41,7 @@ public class PillarSave implements OrchestratorBootstrap {
         this.sc = sc;
         Map<String, Map<String, Object>> fqdn = hosts
                 .stream()
-                .collect(Collectors.toMap(Node::getPrivateIp, node -> discovery(node.getHostname(), node.getPublicIp(), useCustomDomain)));
+                .collect(Collectors.toMap(Node::getPrivateIp, node -> discovery(node.getHostname(), node.getPublicIp(), useCustomDomain, node.getHostGroup())));
         this.pillar = new Pillar("/nodes/hosts.sls", singletonMap("hosts", fqdn), targets);
         this.targets = targets;
         this.originalTargets = targets;
@@ -72,13 +72,14 @@ public class PillarSave implements OrchestratorBootstrap {
         this.originalTargets = targets;
     }
 
-    private Map<String, Object> discovery(String hostname, String publicAddress, boolean useCustomDomain) {
+    private Map<String, Object> discovery(String hostname, String publicAddress, boolean useCustomDomain, String hostGroup) {
         Map<String, Object> map = new HashMap<>();
         map.put("fqdn", hostname);
         map.put("hostname", hostname.split("\\.")[0]);
         map.put("domain", hostname.replaceFirst(hostname.split("\\.")[0] + ".", ""));
         map.put("custom_domain", useCustomDomain);
         map.put("public_address", StringUtils.isEmpty(publicAddress) ? Boolean.FALSE : Boolean.TRUE);
+        map.put("host_group", hostGroup);
         return map;
     }
 

@@ -106,7 +106,10 @@ public class SaltBootstrap implements OrchestratorBootstrap {
                 saltAction.setMaster(master);
                 saltAction.setServer(gatewayAddress);
                 Node saltMaster = targets.stream().filter(n -> n.getPrivateIp().equals(gatewayAddress)).findFirst().get();
-                saltAction.addMinion(createMinion(saltMaster));
+                master.setHostName(saltMaster.getHostGroup());
+                Minion masterMinion = createMinion(saltMaster);
+                masterMinion.setHostName(saltMaster.getHostGroup());
+                saltAction.addMinion(masterMinion);
             }
         }
         for (Node minion : targets.stream().filter(node -> !getGatewayPrivateIps().contains(node.getPrivateIp())).collect(Collectors.toList())) {
@@ -121,6 +124,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         minion.setRoles(Collections.emptyList());
         minion.setHostGroup(node.getHostGroup());
         minion.setDomain(domain);
+        minion.setHostName(node.getHostGroup());
         minion.setServers(getGatewayPrivateIps());
         // set due to compatibility reasons
         minion.setServer(getGatewayPrivateIps().get(0));

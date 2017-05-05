@@ -20,6 +20,8 @@ public class Minion {
 
     private String domain;
 
+    private String hostName;
+
     public String getAddress() {
         return address;
     }
@@ -74,5 +76,13 @@ public class Minion {
 
     public void setServers(List<String> servers) {
         this.servers = servers;
+    }
+
+    public String getHostName() {
+        return hostName;
+    }
+
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
     }
 }

@@ -99,8 +99,8 @@ public class OrchestratorRecipeExecutor {
         Set<Node> agents = new HashSet<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
-                Node node = new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp(), instanceMetaData.getDiscoveryFQDN());
-                node.setHostGroup(instanceGroup.getGroupName());
+                Node node = new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp(),
+                        instanceMetaData.getDiscoveryFQDN(), instanceGroup.getGroupName());
                 agents.add(node);
             }
         }

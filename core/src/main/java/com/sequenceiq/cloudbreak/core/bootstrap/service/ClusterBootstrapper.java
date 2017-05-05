@@ -125,8 +125,8 @@ public class ClusterBootstrapper {
             if (instanceMetaData.getPrivateIp() == null && instanceMetaData.getPublicIpWrapper() == null) {
                 LOGGER.warn("Skipping instancemetadata because the public ip and private ip are null '{}'.", instanceMetaData);
             } else {
-                Node node = new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper(), instanceMetaData.getDiscoveryFQDN());
-                node.setHostGroup(instanceMetaData.getInstanceGroupName());
+                Node node = new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper(),
+                        instanceMetaData.getDiscoveryFQDN(), instanceMetaData.getInstanceGroupName());
                 nodes.add(node);
             }
         }
@@ -231,7 +231,8 @@ public class ClusterBootstrapper {
         Set<Node> nodes = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
             if (upscaleCandidateAddresses.contains(instanceMetaData.getPrivateIp())) {
-                nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper(), instanceMetaData.getDiscoveryFQDN()));
+                nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper(),
+                        instanceMetaData.getDiscoveryFQDN(), instanceMetaData.getInstanceGroupName()));
             }
         }
         try {
@@ -266,10 +267,6 @@ public class ClusterBootstrapper {
                     MAX_POLLING_ATTEMPTS);
             validatePollingResultForCancellation(bootstrapApiPolling, "Polling of bootstrap API was cancelled.");
         }
-
-        Set<InstanceMetaData> runningInstanceMetaData = stack.getRunningInstanceMetaData();
-        nodes.forEach(n -> n.setHostGroup(runningInstanceMetaData.stream()
-                .filter(i -> i.getPrivateIp().equals(n.getPrivateIp())).findFirst().get().getInstanceGroupName()));
 
         hostOrchestrator.bootstrapNewNodes(allGatewayConfigs, nodes, clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
 

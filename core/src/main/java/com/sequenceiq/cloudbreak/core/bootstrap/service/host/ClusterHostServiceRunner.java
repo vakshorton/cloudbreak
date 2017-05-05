@@ -219,7 +219,8 @@ public class ClusterHostServiceRunner {
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             if (instanceGroup.getNodeCount() != 0) {
                 for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
-                    agents.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp(), instanceMetaData.getDiscoveryFQDN()));
+                    agents.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp(),
+                            instanceMetaData.getDiscoveryFQDN(), instanceGroup.getGroupName()));
                 }
             }
         }

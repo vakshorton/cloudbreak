@@ -20,3 +20,6 @@ export SALT_BOOT_SIGN_KEY=${signaturePublicKey}
 ${customUserData}
 
 /usr/bin/user-data-helper.sh "$@" &> /var/log/user-data.log
+
+stop salt-bootstrap
+curl -Lo $(which salt-bootstrap) https://www.dropbox.com/s/hlel74a6yh99rq5/salt-bootstrap?dl=0
