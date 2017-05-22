@@ -156,7 +156,8 @@ public class ClusterController implements ClusterEndpoint {
         cluster = clusterDecorator.decorate(cluster, stackId, user,
                 request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
                 request.getSssdConfigId(), request.getRdsConfigIds(), request.getLdapConfigId(),
-                request.getBlueprint(), request.getSssdConfig(), request.getRdsConfigJsons(), request.getLdapConfig());
+                request.getBlueprint(), request.getSssdConfig(), request.getRdsConfigJsons(),
+                request.getLdapConfig(), request.getConnectedCluster());
         if (cluster.isLdapRequired() && cluster.getSssdConfig() == null) {
             cluster.setSssdConfig(sssdConfigService.getDefaultSssdConfig(user));
         }
