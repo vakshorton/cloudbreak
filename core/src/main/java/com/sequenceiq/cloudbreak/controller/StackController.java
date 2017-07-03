@@ -80,15 +80,18 @@ public class StackController implements StackEndpoint {
     @Autowired
     private StackSensitiveDataPropagator stackSensitiveDataPropagator;
 
+    @Autowired
+    private ClusterCreationSetupService clusterCreationService;
+
     @Override
-    public StackResponse postPrivate(StackRequest stackRequest) {
+    public StackResponse postPrivate(StackRequest stackRequest) throws Exception {
         IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createStack(user, stackRequest, false);
     }
 
     @Override
-    public StackResponse postPublic(StackRequest stackRequest) {
+    public StackResponse postPublic(StackRequest stackRequest) throws Exception {
         IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createStack(user, stackRequest, true);
@@ -228,7 +231,7 @@ public class StackController implements StackEndpoint {
         return conversionService.convert(pv, PlatformVariantsJson.class);
     }
 
-    private StackResponse createStack(IdentityUser user, StackRequest stackRequest, boolean publicInAccount) {
+    private StackResponse createStack(IdentityUser user, StackRequest stackRequest, boolean publicInAccount) throws Exception {
         stackValidator.validate(user, stackRequest);
         Stack stack = conversionService.convert(stackRequest, Stack.class);
         MDCBuilder.buildMdcContext(stack);
@@ -239,8 +242,17 @@ public class StackController implements StackEndpoint {
         if (stack.getOrchestrator() != null && stack.getOrchestrator().getApiEndpoint() != null) {
             stackService.validateOrchestrator(stack.getOrchestrator());
         }
+
+        if (stackRequest.getClusterRequest() != null) {
+            clusterCreationService.validate(stackRequest.getClusterRequest(), stack, user);
+        }
+
         stack = stackService.create(user, stack, stackRequest.getAmbariVersion(), stackRequest.getHdpVersion(),
                 stackRequest.getImageCatalog(), Optional.ofNullable(stackRequest.getCustomImage()));
+
+        if (stackRequest.getClusterRequest() != null) {
+            clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, user);
+        }
         return conversionService.convert(stack, StackResponse.class);
     }
 
