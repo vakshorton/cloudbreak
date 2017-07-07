@@ -244,6 +244,11 @@ public class StackController implements StackEndpoint {
         }
 
         if (stackRequest.getClusterRequest() != null) {
+            StackValidationRequest stackValidationRequest = conversionService.convert(stackRequest, StackValidationRequest.class);
+            StackValidation stackValidation = conversionService.convert(stackValidationRequest, StackValidation.class);
+            stackService.validateStack(stackValidation);
+            CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stackValidation.getCredential());
+            fileSystemValidator.validateFileSystem(stackValidationRequest.getPlatform(), cloudCredential, stackValidationRequest.getFileSystem());
             clusterCreationService.validate(stackRequest.getClusterRequest(), stack, user);
         }
 
