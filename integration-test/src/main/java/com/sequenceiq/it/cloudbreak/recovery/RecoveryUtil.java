@@ -80,7 +80,7 @@ public class RecoveryUtil {
                 .authenticate();
 
         ServerService servers =  os.compute().servers();
-        servers.delete(instanceId);
+        //servers.delete(instanceId);
         LOGGER.info("Instance was deleted with id: " + instanceId);
     }
 
