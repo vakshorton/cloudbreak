@@ -1,7 +1,17 @@
 server:
   contextPath: "/cb"
 
+management.security.enabled: false
+
 spring:
+  boot.admin:
+    url: http://localhost:8080
+    client:
+      metadata:
+        user.name: admin
+        user.password: admin
+  application:
+      name: cloudbreak
   cloud:
     consul:
       host: consul.service.consul
