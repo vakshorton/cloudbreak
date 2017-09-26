@@ -5,7 +5,6 @@ import java.util.Set;
 
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
@@ -26,7 +25,7 @@ public abstract class BlueprintBase implements JsonEntity {
     @ApiModelProperty(BlueprintModelDescription.INPUTS)
     private Set<BlueprintParameterJson> inputs = new HashSet<>();
 
-    @JsonRawValue
+//    @JsonRawValue
     public String getAmbariBlueprint() {
         return ambariBlueprint;
     }
