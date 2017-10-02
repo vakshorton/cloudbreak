@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -9,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -32,7 +34,15 @@ public abstract class BlueprintBase implements JsonEntity {
     }
 
     public void setAmbariBlueprint(JsonNode ambariBlueprint) {
-        this.ambariBlueprint = ambariBlueprint.toString();
+        if (ambariBlueprint.isTextual()) {
+            try {
+                this.ambariBlueprint = JsonUtil.readTree(ambariBlueprint.asText()).toString();
+            } catch (IOException e) {
+                // we'll need to do something here
+            }
+        } else {
+            this.ambariBlueprint = ambariBlueprint.toString();
+        }
     }
 
     public String getDescription() {
