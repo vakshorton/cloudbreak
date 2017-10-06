@@ -51,7 +51,7 @@ public class EncryptedSnapshotPreparator {
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
 
     public Optional<String> createSnapshotIfNeeded(AuthenticatedContext ac, Group group) {
-        InstanceTemplate instanceTemplate = group.getInstances().get(0).getTemplate();
+        InstanceTemplate instanceTemplate = group.getReferenceInstanceConfiguration().getTemplate();
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         AwsInstanceView awsInstanceView = new AwsInstanceView(instanceTemplate);
         AwsCredentialView awsCredentialView = new AwsCredentialView(ac.getCloudCredential());
@@ -91,7 +91,9 @@ public class EncryptedSnapshotPreparator {
     }
 
     private ImmutableList<Tag> prepareTagList(AwsInstanceView awsInstanceView) {
-        return ImmutableList.of(new Tag().withKey(CLOUDBREAK_EBS_SNAPSHOT).withValue(String.format(CLOUDBREAK_EBS_SNAPSHOT, awsInstanceView.getTemplateId())));
+        return ImmutableList.of(new Tag()
+                .withKey(String.format(CLOUDBREAK_EBS_SNAPSHOT, awsInstanceView.getTemplateId()))
+                .withValue(String.format(CLOUDBREAK_EBS_SNAPSHOT, awsInstanceView.getTemplateId())));
     }
 
     private void checkSnapshotReadiness(AuthenticatedContext ac, AmazonEC2Client client, CreateSnapshotResult snapshotResult) {
@@ -151,7 +153,7 @@ public class EncryptedSnapshotPreparator {
     }
 
     public boolean isEncryptedVolumeRequested(Group group) {
-        return group.getInstances().stream().anyMatch(cloudInstance -> new AwsInstanceView(cloudInstance.getTemplate()).isEncryptedVolumes());
+        return new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate()).isEncryptedVolumes();
     }
 
 }
