@@ -99,6 +99,7 @@ public class ClusterCreationSetupService {
 
     public Cluster prepare(ClusterRequest request, Stack stack, IdentityUser user) throws Exception {
         Cluster cluster = conversionService.convert(request, Cluster.class);
+        cluster.setName(stack.getName());
         cluster = clusterDecorator.decorate(cluster, stack.getId(), user,
                 request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
                 request.getRdsConfigIds(), request.getLdapConfigId(),

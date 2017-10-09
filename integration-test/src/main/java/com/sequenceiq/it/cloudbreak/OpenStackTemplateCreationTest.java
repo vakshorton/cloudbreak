@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
@@ -31,16 +30,11 @@ public class OpenStackTemplateCreationTest extends AbstractCloudbreakIntegration
         // GIVEN
         // WHEN
         TemplateRequest templateRequest = new TemplateRequest();
-        templateRequest.setName(templateName);
         templateRequest.setDescription("OpenStack template for integration testing");
-        templateRequest.setCloudPlatform("OPENSTACK");
         templateRequest.setVolumeType("HDD");
         templateRequest.setInstanceType(instanceType);
         templateRequest.setVolumeCount(Integer.valueOf(volumeCount));
         templateRequest.setVolumeSize(Integer.valueOf(volumeSize));
-        String id = getCloudbreakClient().templateEndpoint().postPrivate(templateRequest).getId().toString();
-        // THEN
-        Assert.assertNotNull(id);
-        additionHelper.handleTemplateAdditions(getItContext(), id, additions);
+        additionHelper.handleTemplateAdditions(getItContext(), templateRequest, additions);
     }
 }

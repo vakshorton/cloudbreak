@@ -256,8 +256,8 @@ public class ShellContext {
             instanceGroups.put(
                     instanceGroup.getGroup(),
                     new InstanceGroupEntry(
-                            instanceGroup.getTemplateId(),
-                            instanceGroup.getSecurityGroupId(),
+                            null,
+                            null,
                             instanceGroup.getNodeCount(),
                             instanceGroup.getType().name(),
                             instanceGroup.getParameters()

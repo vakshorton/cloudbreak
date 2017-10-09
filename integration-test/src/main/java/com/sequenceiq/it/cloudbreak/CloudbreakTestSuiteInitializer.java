@@ -23,10 +23,7 @@ import org.testng.annotations.Parameters;
 
 import com.sequenceiq.cloudbreak.api.endpoint.BlueprintEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.CredentialEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.NetworkEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -94,10 +91,10 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
 
     @BeforeSuite(dependsOnMethods = "initContext")
     @Parameters({"cloudbreakServer", "cloudProvider", "credentialName", "instanceGroups", "hostGroups", "blueprintName",
-            "stackName", "networkName", "securityGroupName" })
+            "stackName"})
     public void initCloudbreakSuite(@Optional("") String cloudbreakServer, @Optional("") String cloudProvider, @Optional("") String credentialName,
             @Optional("") String instanceGroups, @Optional("") String hostGroups, @Optional("") String blueprintName,
-            @Optional("") String stackName, @Optional("") String networkName, @Optional("") String securityGroupName) {
+            @Optional("") String stackName) {
         cloudbreakServer = StringUtils.hasLength(cloudbreakServer) ? cloudbreakServer : defaultCloudbreakServer;
         itContext.putContextParam(CloudbreakITContextConstants.SKIP_REMAINING_SUITETEST_AFTER_ONE_FAILED, skipRemainingSuiteTestsAfterOneFailed);
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER, cloudbreakServer);
@@ -114,21 +111,17 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         }
         putBlueprintToContextIfExist(
                 itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).blueprintEndpoint(), blueprintName);
-        putNetworkToContext(
-                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).networkEndpoint(), cloudProvider, networkName);
-        putSecurityGroupToContext(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).securityGroupEndpoint(),
-                cloudProvider, securityGroupName);
         putCredentialToContext(
                 itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).credentialEndpoint(), cloudProvider,
                 credentialName);
         putStackToContextIfExist(
                 itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint(), stackName);
-        if (StringUtils.hasLength(instanceGroups)) {
+        /* if (StringUtils.hasLength(instanceGroups)) {
             List<String[]> instanceGroupStrings = templateAdditionHelper.parseCommaSeparatedRows(instanceGroups);
-            itContext.putContextParam(CloudbreakITContextConstants.TEMPLATE_ID,
+            itContext.putContextParam(CloudbreakITContextConstants.TEMPLATE,
                     createInstanceGroups(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).templateEndpoint(),
                             instanceGroupStrings));
-        }
+        }*/
         if (StringUtils.hasLength(hostGroups)) {
             List<String[]> hostGroupStrings = templateAdditionHelper.parseCommaSeparatedRows(hostGroups);
             itContext.putContextParam(CloudbreakITContextConstants.HOSTGROUP_ID, createHostGroups(hostGroupStrings));
@@ -169,34 +162,6 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         itContext.putContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID, ambariPort);
     }
 
-    private void putNetworkToContext(NetworkEndpoint endpoint, String cloudProvider, String networkName) {
-        endpoint.getPublics();
-        if (StringUtils.isEmpty(networkName)) {
-            networkName = itProps.getDefaultNetwork(cloudProvider);
-        }
-        if (StringUtils.hasLength(networkName)) {
-            Long resourceId = endpoint.getPublic(networkName).getId();
-            if (resourceId != null) {
-                itContext.putContextParam(CloudbreakITContextConstants.NETWORK_ID, resourceId.toString());
-            }
-        }
-    }
-
-    private void putSecurityGroupToContext(SecurityGroupEndpoint endpoint, String cloudProvider, String securityGroupName) {
-        endpoint.getPublics();
-        if (StringUtils.isEmpty(securityGroupName)) {
-            securityGroupName = itProps.getDefaultSecurityGroup(cloudProvider);
-        }
-        if (StringUtils.hasLength(securityGroupName)) {
-            try {
-                Long resourceId = endpoint.getPublic(securityGroupName).getId();
-                itContext.putContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID, resourceId.toString());
-            } catch (RuntimeException e) {
-                LOG.warn("Could not set security group id", e);
-            }
-        }
-    }
-
     private void putStackToContextIfExist(StackEndpoint endpoint, String stackName) {
         if (StringUtils.hasLength(stackName)) {
             Long resourceId = endpoint.getPublic(stackName, new HashSet<>()).getId();
@@ -217,7 +182,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         }
     }
 
-    private List<InstanceGroup> createInstanceGroups(TemplateEndpoint endpoint, Iterable<String[]> instanceGroupStrings) {
+    /* private List<InstanceGroup> createInstanceGroups(TemplateEndpoint endpoint, Iterable<String[]> instanceGroupStrings) {
         List<InstanceGroup> instanceGroups = new ArrayList<>();
         for (String[] instanceGroupStr : instanceGroupStrings) {
             String type = instanceGroupStr.length == WITH_TYPE_LENGTH ? instanceGroupStr[WITH_TYPE_LENGTH - 1] : "CORE";
@@ -225,7 +190,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
                     Integer.parseInt(instanceGroupStr[2]), type));
         }
         return instanceGroups;
-    }
+    }*/
 
     private List<HostGroup> createHostGroups(Iterable<String[]> hostGroupStrings) {
         List<HostGroup> hostGroups = new ArrayList<>();
@@ -242,16 +207,6 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             CloudbreakClient cloudbreakClient = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class);
             String stackId = itContext.getCleanUpParameter(CloudbreakITContextConstants.STACK_ID);
             cleanUpService.deleteStackAndWait(cloudbreakClient, stackId);
-            List<InstanceGroup> instanceGroups = itContext.getCleanUpParameter(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
-            if (instanceGroups != null && !instanceGroups.isEmpty()) {
-                Set<String> deletedTemplates = new HashSet<>();
-                for (InstanceGroup ig : instanceGroups) {
-                    if (!deletedTemplates.contains(ig.getTemplateId())) {
-                        cleanUpService.deleteTemplate(cloudbreakClient, ig.getTemplateId());
-                        deletedTemplates.add(ig.getTemplateId());
-                    }
-                }
-            }
             Set<Long> recipeIds = itContext.getContextParam(CloudbreakITContextConstants.RECIPE_ID, Set.class);
             if (recipeIds != null) {
                 for (Long recipeId : recipeIds) {
@@ -261,8 +216,6 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
 
             cleanUpService.deleteCredential(cloudbreakClient, itContext.getCleanUpParameter(CloudbreakITContextConstants.CREDENTIAL_ID));
             cleanUpService.deleteBlueprint(cloudbreakClient, itContext.getCleanUpParameter(CloudbreakITContextConstants.BLUEPRINT_ID));
-            cleanUpService.deleteNetwork(cloudbreakClient, itContext.getCleanUpParameter(CloudbreakITContextConstants.NETWORK_ID));
-            cleanUpService.deleteSecurityGroup(cloudbreakClient, itContext.getCleanUpParameter(CloudbreakITContextConstants.SECURITY_GROUP_ID));
             cleanUpService.deleteRdsConfigs(cloudbreakClient, itContext.getCleanUpParameter(CloudbreakITContextConstants.RDS_CONFIG_ID));
 
         }

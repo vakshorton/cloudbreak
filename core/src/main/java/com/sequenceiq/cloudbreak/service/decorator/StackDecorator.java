@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
@@ -75,7 +76,7 @@ public class StackDecorator implements Decorator<Stack> {
 
     private enum DecorationData {
         CREDENTIAL_ID,
-        NETWORK_ID,
+        NETWORK,
         USER,
         FLEX_ID,
         CREDENTIAL_NAME
@@ -88,15 +89,14 @@ public class StackDecorator implements Decorator<Stack> {
         String credentialName = (String) data[DecorationData.CREDENTIAL_NAME.ordinal()];
         IdentityUser user = (IdentityUser) data[DecorationData.USER.ordinal()];
         if (credentialId != null || subject.getCredential() != null || credentialName != null) {
-            Object networkId = data[DecorationData.NETWORK_ID.ordinal()];
+            NetworkRequest network = (NetworkRequest) data[DecorationData.NETWORK.ordinal()];
 
             prepareCredential(subject, credentialId, credentialName, user);
             subject.setCloudPlatform(subject.getCredential().cloudPlatform());
-            if (subject.getInstanceGroups() == null || (networkId == null && subject.getNetwork() == null
-                    && !BYOS.equals(subject.getCredential().cloudPlatform()))) {
+            if (subject.getInstanceGroups() == null || (network == null && !BYOS.equals(subject.getCredential().cloudPlatform()))) {
                 throw new BadRequestException("Instance groups and network must be specified!");
             }
-            prepareNetwork(subject, networkId);
+            prepareNetwork(subject, network);
             prepareOrchestratorIfNotExist(subject, subject.getCredential());
             if (subject.getFailurePolicy() != null) {
                 validatFailurePolicy(subject, subject.getFailurePolicy());
@@ -119,9 +119,9 @@ public class StackDecorator implements Decorator<Stack> {
         }
     }
 
-    private void prepareNetwork(Stack subject, Object networkId) {
-        if (networkId != null) {
-            subject.setNetwork(networkService.getById((Long) networkId));
+    // WTF !!! orchestrator minek ide
+    private void prepareNetwork(Stack subject, NetworkRequest networkRequest) {
+        if (networkRequest != null) {
             if (subject.getOrchestrator() != null && ((subject.getOrchestrator().getApiEndpoint() != null || subject.getOrchestrator().getType() == null)
                     && !BYOS.equals(subject.cloudPlatform()))) {
                 throw new BadRequestException("Orchestrator cannot be configured for the stack!");

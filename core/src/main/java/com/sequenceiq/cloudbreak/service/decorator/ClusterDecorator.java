@@ -126,6 +126,9 @@ public class ClusterDecorator implements Decorator<Cluster> {
         } else {
             throw new BadRequestException("Blueprint does not configured for the cluster!");
         }
+        if (subject.getGateway() != null) {
+            subject.getGateway().setPath(stack.getName());
+        }
         subject.setHostGroups(convertHostGroupsFromJson(stack, user, subject, hostGroupsJsons));
         boolean validate = (boolean) data[DecorationData.VALIDATE_BLUEPRINT.ordinal()];
         if (validate) {

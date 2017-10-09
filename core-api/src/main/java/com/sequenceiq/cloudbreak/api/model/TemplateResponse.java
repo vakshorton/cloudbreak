@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
@@ -24,6 +26,10 @@ public class TemplateResponse extends TemplateBase {
 
     @ApiModelProperty(value = TemplateModelDescription.VOLUME_SIZE, required = true)
     private Integer volumeSize;
+
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
+    private String cloudPlatform;
 
     public String getName() {
         return name;
@@ -64,5 +70,13 @@ public class TemplateResponse extends TemplateBase {
 
     public void setVolumeCount(Integer volumeCount) {
         this.volumeCount = volumeCount;
+    }
+
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(String type) {
+        cloudPlatform = type;
     }
 }

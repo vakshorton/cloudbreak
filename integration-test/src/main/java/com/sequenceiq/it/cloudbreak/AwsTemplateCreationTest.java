@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
@@ -34,9 +33,7 @@ public class AwsTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
         // GIVEN
         // WHEN
         TemplateRequest templateRequest = new TemplateRequest();
-        templateRequest.setName(awsTemplateName);
         templateRequest.setDescription("AWS template for integration testing");
-        templateRequest.setCloudPlatform("AWS");
         templateRequest.setInstanceType(awsInstanceType);
         templateRequest.setVolumeCount(Integer.valueOf(awsVolumeCount));
         templateRequest.setVolumeSize(Integer.valueOf(awsVolumeSize));
@@ -47,10 +44,6 @@ public class AwsTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
             map.put("spotPrice", awsSpotPrice);
         }
         templateRequest.setParameters(map);
-        templateRequest.setCloudPlatform("AWS");
-        String id = getCloudbreakClient().templateEndpoint().postPrivate(templateRequest).getId().toString();
-        // THEN
-        Assert.assertNotNull(id);
-        templateAdditionHelper.handleTemplateAdditions(getItContext(), id, additions);
+        templateAdditionHelper.handleTemplateAdditions(getItContext(), templateRequest, additions);
     }
 }

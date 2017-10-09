@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
@@ -28,15 +27,10 @@ public class JsonToNetworkConverter extends AbstractConversionServiceAwareConver
     @Override
     public Network convert(NetworkRequest source) {
         Network network = new Network();
-        if (Strings.isNullOrEmpty(source.getName())) {
-            network.setName(missingResourceNameGenerator.generateName(APIResourceType.NETWORK));
-        } else {
-            network.setName(source.getName());
-        }
+        network.setName(missingResourceNameGenerator.generateName(APIResourceType.NETWORK));
         network.setDescription(source.getDescription());
         network.setSubnetCIDR(source.getSubnetCIDR());
         network.setStatus(ResourceStatus.USER_MANAGED);
-        network.setCloudPlatform(source.getCloudPlatform());
         Map<String, Object> parameters = source.getParameters();
         if (parameters != null && !parameters.isEmpty()) {
             try {
@@ -44,9 +38,6 @@ public class JsonToNetworkConverter extends AbstractConversionServiceAwareConver
             } catch (JsonProcessingException ignored) {
                 throw new BadRequestException("Invalid parameters");
             }
-        }
-        if (source.getTopologyId() != null) {
-            network.setTopology(topologyService.getById(source.getTopologyId()));
         }
         return network;
     }

@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
@@ -31,16 +30,11 @@ public class AzureRmTemplateCreationTest extends AbstractCloudbreakIntegrationTe
         // GIVEN
         // WHEN
         TemplateRequest templateRequest = new TemplateRequest();
-        templateRequest.setName(azureTemplateName);
         templateRequest.setDescription("AZURE_RM template for integration testing");
-        templateRequest.setCloudPlatform("AZURE_RM");
         templateRequest.setInstanceType(azureVmType);
         templateRequest.setVolumeType("Standard_LRS");
         templateRequest.setVolumeCount(Integer.valueOf(azureVolumeCount));
         templateRequest.setVolumeSize(Integer.valueOf(azureVolumeSize));
-        String id = getCloudbreakClient().templateEndpoint().postPrivate(templateRequest).getId().toString();
-        // THEN
-        Assert.assertNotNull(id);
-        templateAdditionHelper.handleTemplateAdditions(getItContext(), id, additions);
+        templateAdditionHelper.handleTemplateAdditions(getItContext(), templateRequest, additions);
     }
 }

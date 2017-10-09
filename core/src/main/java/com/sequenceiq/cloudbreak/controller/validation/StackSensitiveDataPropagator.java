@@ -17,10 +17,8 @@ public class StackSensitiveDataPropagator {
     private CredentialSourceDecorator credentialSourceDecorator;
 
     public Stack propagate(StackRequest request, Stack stack, IdentityUser user) {
-        if (request.getCredentialSource() != null) {
-            Credential decorate = credentialSourceDecorator.decorate(stack.getCredential(), request.getCredentialSource(), user);
-            stack.setCredential(decorate);
-        }
+        Credential decorate = credentialSourceDecorator.decorate(stack.getCredential(), request.getCredentialName(), request.getCredentialId(), user);
+        stack.setCredential(decorate);
         return stack;
     }
 }

@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyRequest;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
@@ -45,10 +46,10 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
     @BeforeMethod
     public void setContextParams() {
         IntegrationTestContext itContext = getItContext();
-        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class), "Template id is mandatory.");
+        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE, List.class), "Template is mandatory.");
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID), "Credential id is mandatory.");
-        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID), "Network id is mandatory.");
-        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID), "Security group id is mandatory.");
+        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.NETWORK), "Network is mandatory.");
+        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.SECURITY_GROUP), "Security group is mandatory.");
     }
 
     @Test
@@ -61,7 +62,7 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
             throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
-        List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
+        List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE, List.class);
         List<InstanceGroupRequest> igMap = new ArrayList<>();
 
         int numberOfServers = 0;
@@ -69,7 +70,7 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
             InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
             instanceGroupRequest.setGroup(ig.getName());
             instanceGroupRequest.setNodeCount(ig.getNodeCount());
-            instanceGroupRequest.setTemplateId(Long.valueOf(ig.getTemplateId()));
+            instanceGroupRequest.setTemplate(ig.getTemplateRequest());
             instanceGroupRequest.setType(InstanceGroupType.valueOf(ig.getType()));
             igMap.add(instanceGroupRequest);
             numberOfServers += ig.getNodeCount();
@@ -81,7 +82,7 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
         mockInstanceUtil.addInstance(instanceMap, numberOfServers);
 
         String credentialId = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID);
-        String networkId = itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID);
+        NetworkRequest networkRequest = itContext.getContextParam(CloudbreakITContextConstants.NETWORK, NetworkRequest.class);
         StackRequest stackRequest = new StackRequest();
 
         publicKeyFile = StringUtils.hasLength(publicKeyFile) ? publicKeyFile : defaultPublicKeyFile;
@@ -98,7 +99,7 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
         failurePolicyRequest.setAdjustmentType(AdjustmentType.valueOf(adjustmentType));
         failurePolicyRequest.setThreshold(threshold);
         stackRequest.setFailurePolicy(failurePolicyRequest);
-        stackRequest.setNetworkId(Long.valueOf(networkId));
+        stackRequest.setNetwork(networkRequest);
         stackRequest.setPlatformVariant(variant);
         stackRequest.setAvailabilityZone(availabilityZone);
         stackRequest.setInstanceGroups(igMap);

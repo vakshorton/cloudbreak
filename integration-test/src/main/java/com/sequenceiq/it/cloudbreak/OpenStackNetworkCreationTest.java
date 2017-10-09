@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
-import org.testng.Assert;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -26,17 +25,11 @@ public class OpenStackNetworkCreationTest extends AbstractCloudbreakIntegrationT
         // WHEN
         NetworkRequest networkRequest = new NetworkRequest();
         networkRequest.setDescription("OpenStack network for integration testing");
-        networkRequest.setName(networkName);
         networkRequest.setSubnetCIDR(subnetCIDR);
         Map<String, Object> map = new HashMap<>();
         map.put("publicNetId", publicNetId);
         networkRequest.setParameters(map);
-        networkRequest.setCloudPlatform("OPENSTACK");
-
-        String id = getCloudbreakClient().networkEndpoint().postPrivate(networkRequest).getId().toString();
-        // THEN
-        Assert.assertNotNull(id);
-        getItContext().putContextParam(CloudbreakITContextConstants.NETWORK_ID, id, true);
+        getItContext().putContextParam(CloudbreakITContextConstants.NETWORK, networkRequest, true);
     }
 
     private String getPublicNetId(String publicNetId, String defaultPublicNetId) {

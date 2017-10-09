@@ -9,15 +9,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
-import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
-import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 import com.sequenceiq.it.cloudbreak.WaitResult;
@@ -46,24 +42,6 @@ public class CleanupService {
         for (StackResponse stack : stacks) {
             if (stack.getName().startsWith("it-")) {
                 deleteStackAndWait(cloudbreakClient, String.valueOf(stack.getId()));
-            }
-        }
-        Set<TemplateResponse> templates = cloudbreakClient.templateEndpoint().getPrivates();
-        for (TemplateResponse template : templates) {
-            if (template.getName().startsWith("it-")) {
-                deleteTemplate(cloudbreakClient, String.valueOf(template.getId()));
-            }
-        }
-        Set<NetworkResponse> networks = cloudbreakClient.networkEndpoint().getPrivates();
-        for (NetworkResponse network : networks) {
-            if (network.getName().startsWith("it-")) {
-                deleteNetwork(cloudbreakClient, String.valueOf(network.getId()));
-            }
-        }
-        Set<SecurityGroupResponse> secgroups = cloudbreakClient.securityGroupEndpoint().getPrivates();
-        for (SecurityGroupResponse secgroup : secgroups) {
-            if (secgroup.getName().startsWith("it-")) {
-                deleteSecurityGroup(cloudbreakClient, String.valueOf(secgroup.getId()));
             }
         }
         Set<BlueprintResponse> blueprints = cloudbreakClient.blueprintEndpoint().getPrivates();
@@ -99,37 +77,6 @@ public class CleanupService {
         if (credentialId != null) {
             cloudbreakClient.credentialEndpoint().delete(Long.valueOf(credentialId));
             result = true;
-        }
-        return result;
-    }
-
-    public boolean deleteTemplate(CloudbreakClient cloudbreakClient, String templateId) {
-        boolean result = false;
-        if (templateId != null) {
-            cloudbreakClient.templateEndpoint().delete(Long.valueOf(templateId));
-            result = true;
-        }
-        return result;
-    }
-
-    public boolean deleteNetwork(CloudbreakClient cloudbreakClient, String networkId) {
-        boolean result = false;
-        if (networkId != null) {
-            cloudbreakClient.networkEndpoint().delete(Long.valueOf(networkId));
-            result = true;
-        }
-        return result;
-    }
-
-    public boolean deleteSecurityGroup(CloudbreakClient cloudbreakClient, String securityGroupId) {
-        boolean result = false;
-        if (securityGroupId != null) {
-            SecurityGroupEndpoint securityGroupEndpoint = cloudbreakClient.securityGroupEndpoint();
-            SecurityGroupResponse securityGroupResponse = securityGroupEndpoint.get(Long.valueOf(securityGroupId));
-            if (!itProps.isDefaultSecurityGroup(securityGroupResponse.getName())) {
-                securityGroupEndpoint.delete(Long.valueOf(securityGroupId));
-                result = true;
-            }
         }
         return result;
     }

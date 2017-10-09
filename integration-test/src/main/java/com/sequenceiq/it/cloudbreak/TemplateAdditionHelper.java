@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class TemplateAdditionHelper {
@@ -29,11 +30,11 @@ public class TemplateAdditionHelper {
         return result;
     }
 
-    public void handleTemplateAdditions(IntegrationTestContext itContext, String templateId, List<TemplateAddition> additions) {
-        List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
+    public void handleTemplateAdditions(IntegrationTestContext itContext, TemplateRequest templateRequest, List<TemplateAddition> additions) {
+        List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE, List.class);
         if (instanceGroups == null) {
             instanceGroups = new ArrayList<>();
-            itContext.putContextParam(CloudbreakITContextConstants.TEMPLATE_ID, instanceGroups, true);
+            itContext.putContextParam(CloudbreakITContextConstants.TEMPLATE, instanceGroups, true);
         }
         List<HostGroup> hostGroups = itContext.getContextParam(CloudbreakITContextConstants.HOSTGROUP_ID, List.class);
         if (hostGroups == null) {
@@ -42,7 +43,7 @@ public class TemplateAdditionHelper {
         }
         for (TemplateAddition addition : additions) {
             String groupName = addition.getGroupName();
-            instanceGroups.add(new InstanceGroup(templateId, addition.getGroupName(), addition.getNodeCount(), addition.getType()));
+            instanceGroups.add(new InstanceGroup(templateRequest, addition.getGroupName(), addition.getNodeCount(), addition.getType()));
             if ("CORE".equals(addition.getType()) || ("GATEWAY".equals(addition.getType()) && !"cbgateway".equals(groupName))) {
                 hostGroups.add(new HostGroup(groupName, groupName, addition.getNodeCount()));
             }

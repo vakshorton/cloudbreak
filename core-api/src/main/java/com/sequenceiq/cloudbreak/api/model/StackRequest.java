@@ -25,9 +25,6 @@ public class StackRequest extends StackBase {
     @ApiModelProperty(StackModelDescription.FAILURE_POLICY)
     private FailurePolicyRequest failurePolicy;
 
-    @ApiModelProperty(StackModelDescription.CREDENTIAL)
-    private CredentialRequest credential;
-
     @ApiModelProperty(StackModelDescription.AUTHENTICATION)
     private StackAuthenticationRequest stackAuthentication;
 
@@ -43,11 +40,11 @@ public class StackRequest extends StackBase {
     @ApiModelProperty(StackModelDescription.FLEX_ID)
     private Long flexId;
 
-    @ApiModelProperty(StackModelDescription.SOURCE_CREDENTIAL)
-    private CredentialSourceRequest credentialSource;
-
     @ApiModelProperty(StackModelDescription.CREDENTIAL_NAME)
     private String credentialName;
+
+    @ApiModelProperty(StackModelDescription.CREDENTIAL_ID)
+    private Long credentialId;
 
     @Valid
     @ApiModelProperty(StackModelDescription.CLUSTER_REQUEST)
@@ -91,14 +88,6 @@ public class StackRequest extends StackBase {
         this.instanceGroups = instanceGroups;
     }
 
-    public CredentialRequest getCredential() {
-        return credential;
-    }
-
-    public void setCredential(CredentialRequest credential) {
-        this.credential = credential;
-    }
-
     public NetworkRequest getNetwork() {
         return network;
     }
@@ -121,14 +110,6 @@ public class StackRequest extends StackBase {
 
     public void setFlexId(Long flexId) {
         this.flexId = flexId;
-    }
-
-    public CredentialSourceRequest getCredentialSource() {
-        return credentialSource;
-    }
-
-    public void setCredentialSource(CredentialSourceRequest credentialSource) {
-        this.credentialSource = credentialSource;
     }
 
     public ClusterRequest getClusterRequest() {
@@ -169,5 +150,13 @@ public class StackRequest extends StackBase {
 
     public void setCredentialName(String credentialName) {
         this.credentialName = credentialName;
+    }
+
+    public Long getCredentialId() {
+        return credentialId;
+    }
+
+    public void setCredentialId(Long credentialId) {
+        this.credentialId = credentialId;
     }
 }

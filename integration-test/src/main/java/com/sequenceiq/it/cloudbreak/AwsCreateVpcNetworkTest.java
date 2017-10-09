@@ -68,15 +68,12 @@ public class AwsCreateVpcNetworkTest extends AbstractCloudbreakIntegrationTest {
         }
 
         NetworkRequest networkRequest = new NetworkRequest();
-        networkRequest.setName(networkName);
         networkRequest.setDescription(description);
         networkRequest.setParameters(networkMap);
         if (!existingSubnet) {
             networkRequest.setSubnetCIDR("10.0.0.0/24");
         }
-        networkRequest.setCloudPlatform("AWS");
-        String id = getCloudbreakClient().networkEndpoint().postPrivate(networkRequest).getId().toString();
-        getItContext().putContextParam(CloudbreakITContextConstants.NETWORK_ID, id, true);
+        getItContext().putContextParam(CloudbreakITContextConstants.NETWORK, networkRequest, true);
     }
 
     private List<Output> getOutputForRequest(String vpcStackName, AmazonCloudFormationClient client) {

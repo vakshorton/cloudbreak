@@ -103,7 +103,6 @@ public class GcpCreateVirtualNetworkTest extends AbstractCloudbreakIntegrationTe
         }
 
         NetworkRequest networkRequest = new NetworkRequest();
-        networkRequest.setName(networkName);
         networkRequest.setDescription(description);
         if (NEW_SUBNET_IN_EXISTING_NETWORK.equals(networkType)) {
             networkRequest.setSubnetCIDR(subnetCIDR);
@@ -114,9 +113,7 @@ public class GcpCreateVirtualNetworkTest extends AbstractCloudbreakIntegrationTe
             map.put("subnetId", vpcSubnet);
         }
         networkRequest.setParameters(map);
-        networkRequest.setCloudPlatform("GCP");
-        String id = getCloudbreakClient().networkEndpoint().postPrivate(networkRequest).getId().toString();
-        getItContext().putContextParam(CloudbreakITContextConstants.NETWORK_ID, id, true);
+        getItContext().putContextParam(CloudbreakITContextConstants.NETWORK, networkRequest, true);
     }
 
     private void waitOperation(Compute compute, Operation operation) throws java.io.IOException {

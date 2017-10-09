@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
@@ -28,16 +27,11 @@ public class JsonToTemplateConverter extends AbstractConversionServiceAwareConve
     @Override
     public Template convert(TemplateRequest source) {
         Template template = new Template();
-        if (Strings.isNullOrEmpty(source.getName())) {
-            template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
-        } else {
-            template.setName(source.getName());
-        }
+        template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         template.setDescription(source.getDescription());
         template.setStatus(ResourceStatus.USER_MANAGED);
         template.setVolumeCount(source.getVolumeCount());
         template.setVolumeSize(source.getVolumeSize());
-        template.setCloudPlatform(source.getCloudPlatform());
         template.setInstanceType(source.getInstanceType());
         String volumeType = source.getVolumeType();
         template.setVolumeType(volumeType == null ? "HDD" : volumeType);
@@ -48,9 +42,6 @@ public class JsonToTemplateConverter extends AbstractConversionServiceAwareConve
             } catch (JsonProcessingException ignored) {
                 throw new BadRequestException("Invalid parameters");
             }
-        }
-        if (source.getTopologyId() != null) {
-            template.setTopology(topologyService.getById(source.getTopologyId()));
         }
         return template;
     }

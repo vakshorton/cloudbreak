@@ -55,7 +55,6 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
 
         // WHEN
         ClusterRequest clusterRequest = new ClusterRequest();
-        clusterRequest.setName(clusterName);
         clusterRequest.setDescription("Cluster for integration test");
         clusterRequest.setEnableSecurity(enableSecurity);
         clusterRequest.setPassword(ambariPassword);

@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -110,11 +109,10 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         stack.setCreated(Calendar.getInstance().getTimeInMillis());
         stack.setPlatformVariant(source.getPlatformVariant());
         stack.setOrchestrator(getConversionService().convert(source.getOrchestrator(), Orchestrator.class));
-        if (source.getCredential() != null) {
-            stack.setCredential(getConversionService().convert(source.getCredential(), Credential.class));
-        }
         if (source.getNetwork() != null) {
-            stack.setNetwork(getConversionService().convert(source.getNetwork(), Network.class));
+            Network network = getConversionService().convert(source.getNetwork(), Network.class);
+            network.setCloudPlatform(source.getCloudPlatform());
+            stack.setNetwork(network);
         }
         stack.setCustomDomain(source.getCustomDomain());
         stack.setCustomHostname(source.getCustomHostname());
@@ -236,7 +234,9 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         for (InstanceGroupRequest instanceGroupRequest : instanceGroupRequests) {
             InstanceGroup instanceGroup = getConversionService().convert(instanceGroupRequest, InstanceGroup.class);
             if (instanceGroup != null) {
-                convertedSet.add(getConversionService().convert(instanceGroupRequest, InstanceGroup.class));
+                instanceGroup.getSecurityGroup().setCloudPlatform(source.getCloudPlatform());
+                instanceGroup.getTemplate().setCloudPlatform(source.getCloudPlatform());
+                convertedSet.add(instanceGroup);
             }
         }
         boolean gatewaySpecified = false;

@@ -80,10 +80,8 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         stackJson.setId(source.getId());
         if (source.getCredential() == null) {
             stackJson.setCloudPlatform(null);
-            stackJson.setCredentialId(null);
         } else {
             stackJson.setCloudPlatform(source.cloudPlatform());
-            stackJson.setCredentialId(source.getCredential().getId());
             stackJson.setCredential(getConversionService().convert(source.getCredential(), CredentialResponse.class));
         }
         stackJson.setStatus(source.getStatus());
@@ -101,12 +99,7 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         if (source.getFailurePolicy() != null) {
             stackJson.setFailurePolicy(getConversionService().convert(source.getFailurePolicy(), FailurePolicyResponse.class));
         }
-        if (source.getNetwork() == null) {
-            stackJson.setNetworkId(null);
-        } else {
-            stackJson.setNetworkId(source.getNetwork().getId());
-            stackJson.setNetwork(getConversionService().convert(source.getNetwork(), NetworkResponse.class));
-        }
+        stackJson.setNetwork(getConversionService().convert(source.getNetwork(), NetworkResponse.class));
         stackJson.setParameters(new HashMap(source.getParameters()));
         stackJson.setPlatformVariant(source.getPlatformVariant());
         if (source.getOrchestrator() != null) {

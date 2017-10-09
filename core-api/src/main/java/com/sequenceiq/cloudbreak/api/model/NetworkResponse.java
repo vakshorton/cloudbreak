@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -19,6 +21,10 @@ public class NetworkResponse extends NetworkBase {
 
     @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount;
+
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
+    private String cloudPlatform;
 
     @JsonProperty("publicInAccount")
     public boolean isPublicInAccount() {
@@ -46,5 +52,13 @@ public class NetworkResponse extends NetworkBase {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(String cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
     }
 }

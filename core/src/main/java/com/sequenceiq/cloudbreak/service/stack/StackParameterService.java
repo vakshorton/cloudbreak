@@ -48,38 +48,34 @@ public class StackParameterService {
     public List<StackParamValidation> getStackParams(IdentityUser user, StackRequest stackRequest) {
         LOGGER.debug("Get stack params");
         Long credentialId = stackRequest.getCredentialId();
-        if (credentialId != null || stackRequest.getCredential() != null || stackRequest.getCredentialSource() != null) {
-            Credential credential;
+        String credentialName = stackRequest.getCredentialName();
+
+        if (credentialId != null || !Strings.isNullOrEmpty(credentialName)) {
+            Credential credential = null;
             if (credentialId != null) {
                 credential = credentialService.get(credentialId);
-            } else if (stackRequest.getCredential() != null) {
-                credential = conversionService.convert(stackRequest.getCredential(), Credential.class);
-            } else {
-                if (!Strings.isNullOrEmpty(stackRequest.getCredentialSource().getSourceName())) {
-                    credential = credentialService.get(stackRequest.getCredentialSource().getSourceName(), user.getAccount());
-                } else {
-                    credential = credentialService.get(stackRequest.getCredentialSource().getSourceId());
+            } else if (!Strings.isNullOrEmpty(credentialName)) {
+                credential = credentialService.get(credentialName, user.getAccount());
+            }
+            if (credential != null) {
+                CloudContext cloudContext = new CloudContext(null, stackRequest.getName(), credential.cloudPlatform(), credential.getOwner());
+
+                GetStackParamValidationRequest getStackParamValidationRequest = new GetStackParamValidationRequest(cloudContext);
+                eventBus.notify(getStackParamValidationRequest.selector(), eventFactory.createEvent(getStackParamValidationRequest));
+                try {
+                    GetStackParamValidationResult res = getStackParamValidationRequest.await();
+                    LOGGER.info("Get stack params result: {}", res);
+                    if (res.getStatus().equals(EventStatus.FAILED)) {
+                        LOGGER.error("Failed to get stack params", res.getErrorDetails());
+                        throw new OperationException(res.getErrorDetails());
+                    }
+                    return res.getStackParamValidations();
+                } catch (InterruptedException e) {
+                    LOGGER.error("Error while getting the stack params", e);
+                    throw new OperationException(e);
                 }
             }
-
-            CloudContext cloudContext = new CloudContext(null, stackRequest.getName(), credential.cloudPlatform(), credential.getOwner());
-
-            GetStackParamValidationRequest getStackParamValidationRequest = new GetStackParamValidationRequest(cloudContext);
-            eventBus.notify(getStackParamValidationRequest.selector(), eventFactory.createEvent(getStackParamValidationRequest));
-            try {
-                GetStackParamValidationResult res = getStackParamValidationRequest.await();
-                LOGGER.info("Get stack params result: {}", res);
-                if (res.getStatus().equals(EventStatus.FAILED)) {
-                    LOGGER.error("Failed to get stack params", res.getErrorDetails());
-                    throw new OperationException(res.getErrorDetails());
-                }
-                return res.getStackParamValidations();
-            } catch (InterruptedException e) {
-                LOGGER.error("Error while getting the stack params", e);
-                throw new OperationException(e);
-            }
-        } else {
-            return Collections.emptyList();
         }
+        return Collections.emptyList();
     }
 }

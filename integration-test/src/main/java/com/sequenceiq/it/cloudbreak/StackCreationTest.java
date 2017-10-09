@@ -34,10 +34,10 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
     @BeforeMethod
     public void setContextParams() {
         IntegrationTestContext itContext = getItContext();
-        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class), "Template id is mandatory.");
+        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE, List.class), "Template is mandatory.");
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID), "Credential id is mandatory.");
-        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID), "Network id is mandatory.");
-        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID), "Security group id is mandatory.");
+        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.NETWORK), "Network is mandatory.");
+        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.SECURITY_GROUP), "Security group is mandatory.");
     }
 
     @Test
@@ -50,19 +50,18 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
             throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
-        List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
+        List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE, List.class);
         List<InstanceGroupRequest> igMap = new ArrayList<>();
         for (InstanceGroup ig : instanceGroups) {
             InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
             instanceGroupRequest.setGroup(ig.getName());
             instanceGroupRequest.setNodeCount(ig.getNodeCount());
-            instanceGroupRequest.setTemplateId(Long.valueOf(ig.getTemplateId()));
+            //instanceGroupRequest.setTemplateId(Long.valueOf(ig.getTemplateId()));
             instanceGroupRequest.setType(InstanceGroupType.valueOf(ig.getType()));
-            instanceGroupRequest.setSecurityGroupId(Long.valueOf(itContext.getContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID)));
+            //instanceGroupRequest.setSecurityGroupId(Long.valueOf(itContext.getContextParam(CloudbreakITContextConstants.SECURITY_GROUP)));
             igMap.add(instanceGroupRequest);
         }
         String credentialId = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID);
-        String networkId = itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID);
         publicKeyFile = StringUtils.hasLength(publicKeyFile) ? publicKeyFile : defaultPublicKeyFile;
         String publicKey = ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "");
         StackRequest stackRequest = new StackRequest();
@@ -77,7 +76,6 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         failurePolicyRequest.setAdjustmentType(AdjustmentType.valueOf(adjustmentType));
         failurePolicyRequest.setThreshold(threshold);
         stackRequest.setFailurePolicy(failurePolicyRequest);
-        stackRequest.setNetworkId(Long.valueOf(networkId));
         stackRequest.setPlatformVariant(variant);
         stackRequest.setAvailabilityZone(availabilityZone);
         stackRequest.setInstanceGroups(igMap);

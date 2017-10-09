@@ -40,7 +40,6 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
     @Override
     public Cluster convert(ClusterRequest source) {
         Cluster cluster = new Cluster();
-        cluster.setName(source.getName());
         cluster.setStatus(REQUESTED);
         cluster.setDescription(source.getDescription());
         cluster.setEmailNeeded(source.getEmailNeeded());
@@ -110,7 +109,6 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         Gateway gateway = new Gateway();
         gateway.setEnableGateway(Boolean.FALSE);
         gateway.setTopologyName("services");
-        gateway.setPath(source.getName());
         gateway.setSsoType(SSOType.NONE);
 
         if (cloudGatewayJson != null) {

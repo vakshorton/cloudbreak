@@ -37,6 +37,10 @@ public class SecurityGroupResponse extends SecurityGroupBase {
     @NotNull
     private boolean publicInAccount;
 
+    @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
+    @NotNull
+    private String cloudPlatform;
+
     public String getName() {
         return name;
     }
@@ -83,5 +87,13 @@ public class SecurityGroupResponse extends SecurityGroupBase {
 
     public void setPublicInAccount(boolean publicInAccount) {
         this.publicInAccount = publicInAccount;
+    }
+
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(String cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
     }
 }

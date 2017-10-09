@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.mock;
 
-import org.testng.Assert;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -18,13 +17,7 @@ public class MockNetworkCreationTest extends AbstractCloudbreakIntegrationTest {
         // WHEN
         NetworkRequest networkRequest = new NetworkRequest();
         networkRequest.setDescription("Mock network for integration testing");
-        networkRequest.setName(networkName);
         networkRequest.setSubnetCIDR(subnetCIDR);
-        networkRequest.setCloudPlatform("MOCK");
-
-        String id = getCloudbreakClient().networkEndpoint().postPrivate(networkRequest).getId().toString();
-        // THEN
-        Assert.assertNotNull(id);
-        getItContext().putContextParam(CloudbreakITContextConstants.NETWORK_ID, id, true);
+        getItContext().putContextParam(CloudbreakITContextConstants.NETWORK, networkRequest, true);
     }
 }

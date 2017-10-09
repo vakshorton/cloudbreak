@@ -219,8 +219,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 StackResponse stack = shellContext.cloudbreakClient().stackEndpoint().get(id, new HashSet<>());
                 if (stack != null) {
                     shellContext.addStack(id.toString(), stack.getName());
-                    shellContext.setCredential(stack.getCredentialId().toString());
-                    shellContext.setActiveNetworkId(stack.getNetworkId());
+                    //shellContext.setCredential(stack.getCredentialId().toString());
+                    //shellContext.setActiveNetworkId(stack.getNetworkId());
                     prepareCluster(id.toString());
                     shellContext.prepareInstanceGroups(stack);
                     if (shellContext.getBlueprintId() == null) {
@@ -236,8 +236,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 if (stack != null) {
                     Long stackId = stack.getId();
                     shellContext.addStack(stackId.toString(), name);
-                    shellContext.setCredential(stack.getCredentialId().toString());
-                    shellContext.setActiveNetworkId(stack.getNetworkId());
+                    //shellContext.setCredential(stack.getCredentialId().toString());
+                    //shellContext.setActiveNetworkId(stack.getNetworkId());
                     prepareCluster(stackId.toString());
                     shellContext.prepareInstanceGroups(stack);
                     if (shellContext.getBlueprintId() == null) {
@@ -317,7 +317,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 stackRequest.setAvailabilityZone(availabilityZone.getName());
             }
             stackRequest.setOnFailureAction(onFailureAction == null ? OnFailureAction.DO_NOTHING : OnFailureAction.valueOf(onFailureAction.name()));
-            stackRequest.setNetworkId(shellContext.getActiveNetworkId());
+            //stackRequest.setNetworkId(shellContext.getActiveNetworkId());
             FailurePolicyRequest failurePolicyRequest = new FailurePolicyRequest();
             CredentialResponse credentialById = shellContext.getCredentialById(shellContext.getCredentialId());
             stackRequest.setCredentialName(credentialById.getName());
@@ -344,10 +344,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 InstanceGroupEntry instanceGroupEntry = stringObjectEntry.getValue();
                 InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
                 instanceGroupRequest.setType(InstanceGroupType.valueOf(instanceGroupEntry.getType()));
-                instanceGroupRequest.setTemplateId(instanceGroupEntry.getTemplateId());
                 instanceGroupRequest.setNodeCount(instanceGroupEntry.getNodeCount());
                 instanceGroupRequest.setGroup(stringObjectEntry.getKey());
-                instanceGroupRequest.setSecurityGroupId(instanceGroupEntry.getSecurityGroupId());
                 instanceGroupRequest.setParameters(instanceGroupEntry.getAttributes());
                 instanceGroupRequestList.add(instanceGroupRequest);
             }

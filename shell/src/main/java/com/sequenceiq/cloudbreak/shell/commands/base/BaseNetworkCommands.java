@@ -172,15 +172,12 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
             String platform) {
         try {
             NetworkRequest networkRequest = new NetworkRequest();
-            networkRequest.setName(name);
             networkRequest.setDescription(description);
-            networkRequest.setCloudPlatform(platform);
             networkRequest.setParameters(parameters);
             networkRequest.setSubnetCIDR(subnet);
             if (platformId != null) {
                 checkTopologyForResource(shellContext.cloudbreakClient().topologyEndpoint().getPublics(), platformId, platform);
             }
-            networkRequest.setTopologyId(platformId);
 
             Long id;
             if (publicInAccount) {

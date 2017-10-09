@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -26,16 +25,11 @@ public class JsonToSecurityGroupConverter extends AbstractConversionServiceAware
     @Override
     public SecurityGroup convert(SecurityGroupRequest source) {
         SecurityGroup entity = new SecurityGroup();
-        if (Strings.isNullOrEmpty(source.getName())) {
-            entity.setName(missingResourceNameGenerator.generateName(APIResourceType.SECURITY_GROUP));
-        } else {
-            entity.setName(source.getName());
-        }
+        entity.setName(missingResourceNameGenerator.generateName(APIResourceType.SECURITY_GROUP));
         entity.setDescription(source.getDescription());
         entity.setStatus(ResourceStatus.USER_MANAGED);
         entity.setSecurityGroupId(source.getSecurityGroupId());
         entity.setSecurityRules(convertSecurityRules(source.getSecurityRules(), entity));
-        entity.setCloudPlatform(source.getCloudPlatform());
         return entity;
     }
 

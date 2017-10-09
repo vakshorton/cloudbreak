@@ -191,13 +191,6 @@ public class ClusterCommands implements BaseCommands {
                     clusterRequest.setCustomContainer(customContainerRequest);
                 }
             }
-            if (shellContext.isMarathonMode()) {
-                clusterRequest.setName(shellContext.getSelectedMarathonStackName());
-            } else if (shellContext.isYarnMode()) {
-                clusterRequest.setName(shellContext.getSelectedYarnStackName());
-            } else {
-                clusterRequest.setName(shellContext.getStackName());
-            }
             clusterRequest.setDescription(description);
             clusterRequest.setUserName(userName);
             clusterRequest.setPassword(password);
@@ -359,7 +352,6 @@ public class ClusterCommands implements BaseCommands {
 
             if (connectionURL != null && connectionUserName != null && connectionPassword != null && databaseType != null && hdpVersion != null) {
                 RDSConfigRequest rdsConfigRequest = new RDSConfigRequest();
-                rdsConfigRequest.setName(clusterRequest.getName());
                 rdsConfigRequest.setConnectionURL(connectionURL);
                 rdsConfigRequest.setDatabaseType(databaseType);
                 rdsConfigRequest.setConnectionUserName(connectionUserName);

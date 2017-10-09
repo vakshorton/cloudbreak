@@ -36,14 +36,8 @@ public abstract class StackBase implements JsonEntity {
     @ApiModelProperty(StackModelDescription.PLATFORM_VARIANT)
     private String platformVariant;
 
-    @ApiModelProperty(StackModelDescription.CREDENTIAL_ID)
-    private Long credentialId;
-
     @ApiModelProperty(StackModelDescription.FAILURE_ACTION)
     private OnFailureAction onFailureAction = OnFailureAction.DO_NOTHING;
-
-    @ApiModelProperty(StackModelDescription.NETWORK_ID)
-    private Long networkId;
 
     @ApiModelProperty(StackModelDescription.AMBARI_VERSION)
     private String ambariVersion;
@@ -101,28 +95,12 @@ public abstract class StackBase implements JsonEntity {
         this.cloudPlatform = cloudPlatform;
     }
 
-    public Long getCredentialId() {
-        return credentialId;
-    }
-
-    public void setCredentialId(Long credentialId) {
-        this.credentialId = credentialId;
-    }
-
     public String getRegion() {
         return region;
     }
 
     public void setRegion(String region) {
         this.region = region;
-    }
-
-    public Long getNetworkId() {
-        return networkId;
-    }
-
-    public void setNetworkId(Long networkId) {
-        this.networkId = networkId;
     }
 
     public String getAvailabilityZone() {

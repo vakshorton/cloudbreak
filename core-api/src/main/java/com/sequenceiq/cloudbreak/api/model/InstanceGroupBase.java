@@ -18,12 +18,6 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class InstanceGroupBase implements JsonEntity {
 
-    @ApiModelProperty(InstanceGroupModelDescription.TEMPLATE_ID)
-    private Long templateId;
-
-    @ApiModelProperty(InstanceGroupModelDescription.SECURITY_GROUP_ID)
-    private Long securityGroupId;
-
     @Min(value = 0, message = "The node count has to be greater or equals than 0")
     @Max(value = 100000, message = "The node count has to be less than 100000")
     @Digits(fraction = 0, integer = 10, message = "The node count has to be a number")
@@ -40,14 +34,6 @@ public abstract class InstanceGroupBase implements JsonEntity {
     @ApiModelProperty(InstanceGroupModelDescription.PARAMETERS)
     private Map<String, Object> parameters = new HashMap<>();
 
-    public Long getTemplateId() {
-        return templateId;
-    }
-
-    public void setTemplateId(Long templateId) {
-        this.templateId = templateId;
-    }
-
     public int getNodeCount() {
         return nodeCount;
     }
@@ -62,14 +48,6 @@ public abstract class InstanceGroupBase implements JsonEntity {
 
     public void setGroup(String group) {
         this.group = group;
-    }
-
-    public Long getSecurityGroupId() {
-        return securityGroupId;
-    }
-
-    public void setSecurityGroupId(Long securityGroupId) {
-        this.securityGroupId = securityGroupId;
     }
 
     public InstanceGroupType getType() {

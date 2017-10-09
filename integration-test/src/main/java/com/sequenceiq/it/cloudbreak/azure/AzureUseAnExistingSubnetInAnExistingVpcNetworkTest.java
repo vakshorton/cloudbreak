@@ -65,16 +65,12 @@ public class AzureUseAnExistingSubnetInAnExistingVpcNetworkTest extends Abstract
                 .create();
 
         NetworkRequest networkRequest = new NetworkRequest();
-        networkRequest.setName(networkName);
         networkRequest.setDescription(description);
         Map<String, Object> map = new HashMap<>();
         map.put("networkId", vpcName);
         map.put("subnetId", vpcSubnet);
         map.put("resourceGroupName", resourceGroupName);
         networkRequest.setParameters(map);
-        networkRequest.setCloudPlatform("AZURE");
-//        networkJson.setPublicInAccount(publicInAccount);
-        String id = getCloudbreakClient().networkEndpoint().postPrivate(networkRequest).getId().toString();
-        getItContext().putContextParam(CloudbreakITContextConstants.NETWORK_ID, id, true);
+        getItContext().putContextParam(CloudbreakITContextConstants.NETWORK, networkRequest, true);
     }
 }

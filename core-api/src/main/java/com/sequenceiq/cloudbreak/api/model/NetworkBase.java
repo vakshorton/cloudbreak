@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.api.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -24,15 +23,8 @@ public abstract class NetworkBase implements JsonEntity {
     @ValidSubnet
     private String subnetCIDR;
 
-    @NotNull
-    @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
-    private String cloudPlatform;
-
     @ApiModelProperty(NetworkModelDescription.PARAMETERS)
     private Map<String, Object> parameters = new HashMap<>();
-
-    @ApiModelProperty(ModelDescriptions.TOPOLOGY_ID)
-    private Long topologyId;
 
     public String getDescription() {
         return description;
@@ -58,19 +50,4 @@ public abstract class NetworkBase implements JsonEntity {
         this.parameters = parameters;
     }
 
-    public String getCloudPlatform() {
-        return cloudPlatform;
-    }
-
-    public void setCloudPlatform(String cloudPlatform) {
-        this.cloudPlatform = cloudPlatform;
-    }
-
-    public Long getTopologyId() {
-        return topologyId;
-    }
-
-    public void setTopologyId(Long topologyId) {
-        this.topologyId = topologyId;
-    }
 }

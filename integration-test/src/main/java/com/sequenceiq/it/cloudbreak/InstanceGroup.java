@@ -1,8 +1,10 @@
 package com.sequenceiq.it.cloudbreak;
 
+import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
+
 public class InstanceGroup {
 
-    private final String templateId;
+    private final TemplateRequest templateRequest;
 
     private final String name;
 
@@ -10,15 +12,15 @@ public class InstanceGroup {
 
     private final String type;
 
-    public InstanceGroup(String templateId, String name, int nodeCount, String type) {
-        this.templateId = templateId;
+    public InstanceGroup(TemplateRequest templateRequest, String name, int nodeCount, String type) {
+        this.templateRequest = templateRequest;
         this.name = name;
         this.nodeCount = nodeCount;
         this.type = type;
     }
 
-    public String getTemplateId() {
-        return templateId;
+    public TemplateRequest getTemplateRequest() {
+        return templateRequest;
     }
 
     public String getName() {

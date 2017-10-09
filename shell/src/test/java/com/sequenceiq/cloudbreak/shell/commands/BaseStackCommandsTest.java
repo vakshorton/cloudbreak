@@ -167,8 +167,8 @@ public class BaseStackCommandsTest {
         StackResponse stackResponse = new StackResponse();
         stackResponse.setName("test1");
         stackResponse.setId(50L);
-        stackResponse.setCredentialId(1L);
-        stackResponse.setNetworkId(1L);
+        //stackResponse.setCredentialId(1L);
+        //stackResponse.setNetworkId(1L);
         return stackResponse;
     }
 }

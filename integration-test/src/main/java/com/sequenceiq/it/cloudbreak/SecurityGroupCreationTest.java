@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak;
 
 import java.util.Collections;
 
-import org.testng.Assert;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -20,18 +19,12 @@ public class SecurityGroupCreationTest extends AbstractCloudbreakIntegrationTest
         // WHEN
         SecurityGroupRequest securityGroupRequest = new SecurityGroupRequest();
         securityGroupRequest.setDescription("Security group created by IT");
-        securityGroupRequest.setName(name);
         SecurityRuleRequest securityRuleRequest = new SecurityRuleRequest("");
         securityRuleRequest.setProtocol("tcp");
         securityRuleRequest.setSubnet("0.0.0.0/0");
         securityRuleRequest.setPorts(ports);
         securityGroupRequest.setSecurityRules(Collections.singletonList(securityRuleRequest));
-        securityGroupRequest.setCloudPlatform(provider);
-
-        String id = getCloudbreakClient().securityGroupEndpoint().postPrivate(securityGroupRequest).getId().toString();
-        // THEN
-        Assert.assertNotNull(id);
-        getItContext().putContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID, id, true);
+        getItContext().putContextParam(CloudbreakITContextConstants.SECURITY_GROUP, securityGroupRequest, true);
     }
 
 }

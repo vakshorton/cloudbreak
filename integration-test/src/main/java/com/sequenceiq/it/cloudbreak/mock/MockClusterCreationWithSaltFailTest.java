@@ -78,7 +78,6 @@ public class MockClusterCreationWithSaltFailTest extends AbstractMockIntegration
         itContext.putContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID, ambariPassword);
         // WHEN
         ClusterRequest clusterRequest = new ClusterRequest();
-        clusterRequest.setName(clusterName);
         clusterRequest.setDescription("Cluster for integration test");
         clusterRequest.setEnableSecurity(enableSecurity);
         clusterRequest.setPassword(ambariPassword);

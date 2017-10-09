@@ -14,9 +14,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class TemplateBase implements JsonEntity {
-    @NotNull
-    @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
-    private String cloudPlatform;
 
     @ApiModelProperty(TemplateModelDescription.PARAMETERS)
     private Map<String, Object> parameters = new HashMap<>();
@@ -32,23 +29,12 @@ public abstract class TemplateBase implements JsonEntity {
     @ApiModelProperty(value = TemplateModelDescription.INSTANCE_TYPE, required = true)
     private String instanceType;
 
-    @ApiModelProperty(ModelDescriptions.TOPOLOGY_ID)
-    private Long topologyId;
-
     public String getDescription() {
         return description;
     }
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getCloudPlatform() {
-        return cloudPlatform;
-    }
-
-    public void setCloudPlatform(String type) {
-        cloudPlatform = type;
     }
 
     public Map<String, Object> getParameters() {
@@ -75,11 +61,4 @@ public abstract class TemplateBase implements JsonEntity {
         this.instanceType = instanceType;
     }
 
-    public Long getTopologyId() {
-        return topologyId;
-    }
-
-    public void setTopologyId(Long topologyId) {
-        this.topologyId = topologyId;
-    }
 }

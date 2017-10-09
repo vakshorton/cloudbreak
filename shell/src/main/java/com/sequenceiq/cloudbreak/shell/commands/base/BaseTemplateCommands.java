@@ -152,8 +152,6 @@ public class BaseTemplateCommands implements BaseCommands, TemplateCommands {
         try {
             Long id;
             TemplateRequest templateRequest = new TemplateRequest();
-            templateRequest.setCloudPlatform(platform);
-            templateRequest.setName(name);
             templateRequest.setDescription(description);
             templateRequest.setInstanceType(instanceType);
             templateRequest.setVolumeCount(volumeCount);
@@ -163,7 +161,6 @@ public class BaseTemplateCommands implements BaseCommands, TemplateCommands {
             if (platformId != null) {
                 checkTopologyForResource(shellContext.cloudbreakClient().topologyEndpoint().getPublics(), platformId, platform);
             }
-            templateRequest.setTopologyId(platformId);
 
             TemplateResponse templateResponse;
             if (publicInAccount) {

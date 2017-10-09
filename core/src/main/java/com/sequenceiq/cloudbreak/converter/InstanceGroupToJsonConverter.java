@@ -23,14 +23,12 @@ public class InstanceGroupToJsonConverter extends AbstractConversionServiceAware
         instanceGroupResponse.setId(entity.getId());
         instanceGroupResponse.setNodeCount(entity.getNodeCount());
         if (entity.getTemplate() != null) {
-            instanceGroupResponse.setTemplateId(entity.getTemplate().getId());
             instanceGroupResponse.setTemplate(getConversionService().convert(entity.getTemplate(), TemplateResponse.class));
         }
         instanceGroupResponse.setType(entity.getInstanceGroupType());
         instanceGroupResponse.setMetadata(convertEntitiesToJson(entity.getInstanceMetaData()));
         if (entity.getSecurityGroup() != null) {
             instanceGroupResponse.setSecurityGroup(getConversionService().convert(entity.getSecurityGroup(), SecurityGroupResponse.class));
-            instanceGroupResponse.setSecurityGroupId(entity.getSecurityGroup().getId());
         }
         Json attributes = entity.getAttributes();
         if (attributes != null) {

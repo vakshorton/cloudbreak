@@ -88,7 +88,7 @@ public class MarathonCommands implements CommandMarker {
         stackRequest.setOrchestrator(orchestratorRequest);
         stackRequest.setRegion("LOCAL");
         stackRequest.setCloudPlatform(BYOS);
-        stackRequest.setCredentialId(Long.valueOf(shellContext.getCredentialId()));
+        //stackRequest.setCredentialId(Long.valueOf(shellContext.getCredentialId()));
 
         for (Entry<String, MarathonHostgroupEntry> entry : entries) {
             InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();

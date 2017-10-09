@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
@@ -34,16 +33,11 @@ public class MockTemplateCreationTest extends AbstractCloudbreakIntegrationTest 
         // GIVEN
         // WHEN
         TemplateRequest templateRequest = new TemplateRequest();
-        templateRequest.setName(templateName);
         templateRequest.setDescription("MOCK template for integration testing");
         templateRequest.setInstanceType(mockInstanceType);
         templateRequest.setVolumeCount(Integer.valueOf(volumeCount));
         templateRequest.setVolumeSize(Integer.valueOf(volumeSize));
         templateRequest.setVolumeType(volumeType);
-        templateRequest.setCloudPlatform("MOCK");
-        String id = getCloudbreakClient().templateEndpoint().postPrivate(templateRequest).getId().toString();
-        // THEN
-        Assert.assertNotNull(id);
-        additionHelper.handleTemplateAdditions(getItContext(), id, additions);
+        additionHelper.handleTemplateAdditions(getItContext(), templateRequest, additions);
     }
 }

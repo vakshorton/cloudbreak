@@ -222,7 +222,7 @@ public class StackController implements StackEndpoint {
         Stack stack = conversionService.convert(stackRequest, Stack.class);
         MDCBuilder.buildMdcContext(stack);
         stack = stackSensitiveDataPropagator.propagate(stackRequest, stack, user);
-        stack = stackDecorator.decorate(stack, stackRequest.getCredentialId(), stackRequest.getNetworkId(), user,
+        stack = stackDecorator.decorate(stack, stackRequest.getCredentialId(), stackRequest.getNetwork(), user,
                 stackRequest.getFlexId(), stackRequest.getCredentialName());
         stack.setPublicInAccount(publicInAccount);
         validateAccountPreferences(stack, user);
