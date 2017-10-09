@@ -17,8 +17,6 @@ angular.module('uluwatuControllers').controller('credentialController', [
 
         $scope.credentialYarn = {};
         $scope.credentialInCreation = false;
-        $scope.mesosStack = {};
-        $scope.mesosStac = false;
         $scope.awsCredentialForm = {};
         $scope.gcpCredentialForm = {};
         $scope.openstackCredentialForm = {};
@@ -28,7 +26,7 @@ angular.module('uluwatuControllers').controller('credentialController', [
         $scope.alertMessage = "";
         var firstVisiblePlatform = $scope.firstVisible(["AWS", "AZURE", "BYOS", "GCP", "OPENSTACK"]);
         if (firstVisiblePlatform != -1) {
-            $scope[["awsCredential", "azureCredential", "mesosCredential", "gcpCredential", "openstackCredential", "yarnCredential"][firstVisiblePlatform]] = true;
+            $scope[["awsCredential", "azureCredential", "gcpCredential", "openstackCredential", "yarnCredential"][firstVisiblePlatform]] = true;
         }
 
         $scope.createAzureCredentialRequest = function() {
@@ -36,7 +34,6 @@ angular.module('uluwatuControllers').controller('credentialController', [
             $scope.gcpCredential = false;
             $scope.openstackCredential = false;
             $scope.azureCredential = true;
-            $scope.mesosCredential = false;
             $scope.yarnCredential = false;
         }
 
@@ -45,7 +42,6 @@ angular.module('uluwatuControllers').controller('credentialController', [
             $scope.gcpCredential = false;
             $scope.openstackCredential = false;
             $scope.azureCredential = false;
-            $scope.mesosCredential = false;
             $scope.yarnCredential = false;
         }
 
@@ -54,7 +50,6 @@ angular.module('uluwatuControllers').controller('credentialController', [
             $scope.gcpCredential = true;
             $scope.openstackCredential = false;
             $scope.azureCredential = false;
-            $scope.mesosCredential = false;
             $scope.yarnCredential = false;
         }
 
@@ -63,16 +58,6 @@ angular.module('uluwatuControllers').controller('credentialController', [
             $scope.gcpCredential = false;
             $scope.openstackCredential = true;
             $scope.azureCredential = false;
-            $scope.mesosCredential = false;
-            $scope.yarnCredential = false;
-        }
-
-        $scope.importMesosStackRequest = function() {
-            $scope.awsCredential = false;
-            $scope.gcpCredential = false;
-            $scope.openstackCredential = false;
-            $scope.azureCredential = false;
-            $scope.mesosCredential = true;
             $scope.yarnCredential = false;
         }
 
@@ -81,7 +66,6 @@ angular.module('uluwatuControllers').controller('credentialController', [
             $scope.gcpCredential = false;
             $scope.openstackCredential = false;
             $scope.azureCredential = false;
-            $scope.mesosCredential = false;
             $scope.yarnCredential = true;
         }
 
@@ -225,39 +209,6 @@ angular.module('uluwatuControllers').controller('credentialController', [
             var blob = p12File.slice(0, p12File.size);
             reader.readAsBinaryString(blob);
 
-        }
-
-        $scope.importMesosStack = function() {
-            $scope.credentialInCreation = true;
-            $scope.mesosStack.orchestrator.type = "MARATHON";
-            if ($scope.mesosStack.public) {
-                AccountStack.save($scope.mesosStack, function(result) {
-                    stackSuccessHandler(result)
-                }, function(error) {
-                    $scope.showError(error, $rootScope.msg.mesos_credential_failed);
-                    $scope.credentialInCreation = false;
-                    $scope.showErrorMessageAlert();
-                });
-            } else {
-                UserStack.save($scope.mesosStack, function(result) {
-                    stackSuccessHandler(result)
-                }, function(error) {
-                    $scope.showError(error, $rootScope.msg.mesos_credential_failed);
-                    $scope.credentialInCreation = false;
-                    $scope.showErrorMessageAlert();
-                });
-            }
-
-            function stackSuccessHandler(result) {
-                $scope.mesosStack.id = result.id;
-                $rootScope.importedStacks.push($scope.mesosStack);
-                $scope.mesosStack = {};
-                $scope.showSuccess($filter("format")($rootScope.msg.mesos_credential_success, String(result.name)));
-                $scope.mesosImportStackForm.$setPristine();
-                collapseCreateCredentialFormPanel();
-                $scope.credentialInCreation = false;
-                $scope.unShowErrorMessageAlert();
-            }
         }
 
         $scope.createYarnCredential = function() {

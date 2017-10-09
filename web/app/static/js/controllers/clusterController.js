@@ -781,7 +781,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.upscaleCluster.numberOfInstances = 1;
                 return;
             }
-            var isByos = $rootScope.activeCluster.orchestrator.type === "MARATHON" || $rootScope.activeCluster.orchestrator.type === "YARN";
+            var isByos = $rootScope.activeCluster.orchestrator.type === "YARN";
             if ($rootScope.activeCluster.orchestrator != null && isByos) {
                 var scaleJson = {
                     "hostGroupAdjustment": {
@@ -847,7 +847,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     "withStackUpdate": false
                 }
             };
-            if ($rootScope.activeCluster.orchestrator != null && $rootScope.activeCluster.orchestrator.type === "MARATHON") {
+            if ($rootScope.activeCluster.orchestrator != null && $rootScope.activeCluster.orchestrator.type === "YARN") {
                 scaleJson.hostGroupAdjustment.withStackUpdate = false;
             } else {
                 scaleJson.hostGroupAdjustment.withStackUpdate = true;
@@ -1542,7 +1542,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $scope.ambariServerSelected = function() {
             var result = false
             var activeStack = $rootScope.activeStack;
-            if ((activeStack && activeStack.orchestrator && (activeStack.orchestrator.type === "MARATHON" || activeStack.orchestrator.type === "YARN"))
+            if ((activeStack && activeStack.orchestrator && (activeStack.orchestrator.type === "YARN"))
                 || ($rootScope.activeCredential && $rootScope.activeCredential.cloudPlatform === 'BYOS')) {
                 return true;
             }

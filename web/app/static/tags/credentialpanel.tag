@@ -31,7 +31,6 @@
                                     <div class="btn-group btn-group-justified">
                                         <a id="awsChange" ng-if="isVisible('AWS')" type="button" ng-class="{'btn':true, 'btn-info':awsCredential, 'btn-default':!awsCredential}" ng-click="createAwsCredentialRequest()">{{msg.aws_label}}</a>
                                         <a id="azureChange" ng-if="isVisible('AZURE')" type="button" ng-class="{'btn':true, 'btn-info':azureCredential, 'btn-default':!azureCredential}" ng-click="createAzureCredentialRequest()">{{msg.azure_label}}</a>
-                                        <a id="mesosChange" ng-if="isVisible('BYOS')" type="button" ng-class="{'btn':true, 'btn-info':mesosCredential, 'btn-default':!mesosCredential}" ng-click="importMesosStackRequest()">{{msg.mesos_label}}</a>
                                         <a id="yarnChange" ng-if="isVisible('BYOS')" type="button" ng-class="{'btn':true, 'btn-info':yarnCredential, 'btn-default':!yarnCredential}" ng-click="importYarnCredentialRequest()">{{msg.yarn_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified" ng-if="isVisible('GCP') || isVisible('OPENSTACK')">
@@ -54,9 +53,6 @@
 
                             <form class="form-horizontal" role="form" name="openstackCredentialForm" ng-show="openstackCredential && isVisible('OPENSTACK')">
                                 <div ng-include src="'tags/credential/openstackform.tag'"></div>
-                            </form>
-                            <form class="form-horizontal" role="form" name="mesosImportStackForm" ng-show="mesosCredential && isVisible('BYOS')">
-                                <div ng-include src="'tags/credential/mesosform.tag'"></div>
                             </form>
                             <form class="form-horizontal" role="form" name="yarnImportStackForm" ng-show="yarnCredential && isVisible('BYOS')">
                                 <div ng-include src="'tags/credential/yarnform.tag'"></div>
@@ -108,10 +104,6 @@
 
                             <div class="panel-body" ng-if="credential.cloudPlatform == 'BYOS' && credential.parameters.type == 'YARN'">
                                 <div ng-include src="'tags/credential/yarnlist.tag'"></div>
-                            </div>
-
-                            <div class="panel-body" ng-if="credential.cloudPlatform == 'BYOS' && credential.parameters.type == 'MARATHON'">
-                                <div ng-include src="'tags/credential/marathonlist.tag'"></div>
                             </div>
 
                         </div>

@@ -64,8 +64,7 @@
         "ALL_NODES": "All Nodes"
     },
     "orchestrators" : {
-      "SALT": "on host with salt",
-      "MARATHON": "in docker containers with marathon"
+      "SALT": "on host with salt"
     },
     "s3types" : {
       "NONE": "Disable Instance Profile attaching by default",
