@@ -13,7 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.commands.base.BaseStackCommands;
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;

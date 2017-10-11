@@ -9,7 +9,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;

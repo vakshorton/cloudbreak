@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.endpoint.ConnectorEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.ConnectorEndpoint;
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformGatewaysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformImagesJson;

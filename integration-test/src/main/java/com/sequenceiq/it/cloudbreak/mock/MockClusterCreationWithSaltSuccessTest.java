@@ -26,7 +26,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.GatewayJson;

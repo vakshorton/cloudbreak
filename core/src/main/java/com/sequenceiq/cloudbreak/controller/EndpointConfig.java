@@ -115,7 +115,8 @@ public class EndpointConfig extends ResourceConfig {
         register(NetworkController.class);
         register(RecipeController.class);
         register(SecurityGroupController.class);
-        register(StackController.class);
+        register(StackV1Controller.class);
+        register(StackV2Controller.class);
         register(TemplateController.class);
         register(ConstraintTemplateController.class);
         register(UserController.class);

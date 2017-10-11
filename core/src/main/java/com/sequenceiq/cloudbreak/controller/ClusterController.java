@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleClusterResponse;

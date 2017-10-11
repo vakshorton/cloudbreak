@@ -19,27 +19,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.CoreApi;
-import com.sequenceiq.cloudbreak.api.endpoint.AccountPreferencesEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.BlueprintEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.ConnectorEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.ConstraintTemplateEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.CredentialEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.EventEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.FlexSubscriptionEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.LdapConfigEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.NetworkEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.RdsConfigEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.SmartSenseSubscriptionEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.SubscriptionEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.TopologyEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.UsageEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.UserEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.UtilEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.AccountPreferencesEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.BlueprintEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.ConnectorEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.ConstraintTemplateEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.EventEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.FlexSubscriptionEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.LdapConfigEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.NetworkEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.RdsConfigEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.RecipeEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityGroupEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.SmartSenseSubscriptionEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.SubscriptionEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.TemplateEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.TopologyEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.UsageEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.UserEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
 
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
@@ -84,7 +84,7 @@ public class CloudbreakClient {
 
     private EndpointWrapper<SecurityGroupEndpoint> securityGroupEndpoint;
 
-    private EndpointWrapper<StackEndpoint> stackEndpoint;
+    private EndpointWrapper<StackV1Endpoint> stackEndpoint;
 
     private EndpointWrapper<SubscriptionEndpoint> subscriptionEndpoint;
 
@@ -170,7 +170,7 @@ public class CloudbreakClient {
         usageEndpoint = newResource(usageEndpoint, UsageEndpoint.class, headers);
         eventEndpoint = newResource(eventEndpoint, EventEndpoint.class, headers);
         securityGroupEndpoint = newResource(securityGroupEndpoint, SecurityGroupEndpoint.class, headers);
-        stackEndpoint = newResource(stackEndpoint, StackEndpoint.class, headers);
+        stackEndpoint = newResource(stackEndpoint, StackV1Endpoint.class, headers);
         subscriptionEndpoint = newResource(subscriptionEndpoint, SubscriptionEndpoint.class, headers);
         networkEndpoint = newResource(networkEndpoint, NetworkEndpoint.class, headers);
         recipeEndpoint = newResource(recipeEndpoint, RecipeEndpoint.class, headers);
@@ -232,7 +232,7 @@ public class CloudbreakClient {
         return securityGroupEndpoint.getEndpointProxy();
     }
 
-    public StackEndpoint stackEndpoint() {
+    public StackV1Endpoint stackEndpoint() {
         refresh();
         return stackEndpoint.getEndpointProxy();
     }
