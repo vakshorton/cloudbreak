@@ -10,8 +10,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
@@ -36,7 +38,7 @@ import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.ConsulServers;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 @Service
-public class StackDecorator implements Decorator<Stack> {
+public class StackDecorator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDecorator.class);
 
@@ -55,7 +57,7 @@ public class StackDecorator implements Decorator<Stack> {
     private SecurityGroupService securityGroupService;
 
     @Inject
-    private Decorator<Template> templateDecorator;
+    private TemplateDecorator templateDecorator;
 
     @Inject
     private TemplateValidator templateValidator;
@@ -73,36 +75,22 @@ public class StackDecorator implements Decorator<Stack> {
     @Inject
     private FlexSubscriptionService flexSubscriptionService;
 
-    private enum DecorationData {
-        CREDENTIAL_ID,
-        NETWORK_ID,
-        USER,
-        FLEX_ID,
-        CREDENTIAL_NAME
-    }
-
-    @Override
-    public Stack decorate(Stack subject, Object... data) {
-        prepareDomainIfDefined(subject, data);
-        Object credentialId = data[DecorationData.CREDENTIAL_ID.ordinal()];
-        String credentialName = (String) data[DecorationData.CREDENTIAL_NAME.ordinal()];
-        IdentityUser user = (IdentityUser) data[DecorationData.USER.ordinal()];
-        if (credentialId != null || subject.getCredential() != null || credentialName != null) {
-            Object networkId = data[DecorationData.NETWORK_ID.ordinal()];
-
-            prepareCredential(subject, credentialId, credentialName, user);
+    public Stack decorate(Stack subject, StackRequest request, IdentityUser user) {
+        prepareCredential(subject, request.getCredentialId(), request.getCredentialName(), user);
+        prepareDomainIfDefined(subject, request, user);
+        if (request.getCredentialId() != null || subject.getCredential() != null || request.getCredentialName() != null) {
             subject.setCloudPlatform(subject.getCredential().cloudPlatform());
-            if (subject.getInstanceGroups() == null || (networkId == null && subject.getNetwork() == null
+            if (subject.getInstanceGroups() == null || (request.getNetworkId() == null && subject.getNetwork() == null
                     && !BYOS.equals(subject.getCredential().cloudPlatform()))) {
                 throw new BadRequestException("Instance groups and network must be specified!");
             }
-            prepareNetwork(subject, networkId);
+            prepareNetwork(subject, request.getNetworkId());
             prepareOrchestratorIfNotExist(subject, subject.getCredential());
             if (subject.getFailurePolicy() != null) {
                 validatFailurePolicy(subject, subject.getFailurePolicy());
             }
-            prepareInstanceGroups(subject, data);
-            prepareFlexSubscription(subject, data);
+            prepareInstanceGroups(subject, request, subject.getCredential(), user);
+            prepareFlexSubscription(subject, request.getFlexId());
             validate(subject);
         }
         return subject;
@@ -129,44 +117,50 @@ public class StackDecorator implements Decorator<Stack> {
         }
     }
 
-    private void prepareInstanceGroups(Stack subject, Object... data) {
-        IdentityUser user = (IdentityUser) data[DecorationData.USER.ordinal()];
+    private void prepareInstanceGroups(Stack subject, StackRequest request, Credential credential, IdentityUser user) {
         for (InstanceGroup instanceGroup : subject.getInstanceGroups()) {
             if (instanceGroup.getTemplate() != null) {
                 Template template = instanceGroup.getTemplate();
-                template.setPublicInAccount(subject.isPublicInAccount());
-                template.setCloudPlatform(subject.cloudPlatform());
-                templateValidator.validateTemplateRequest(instanceGroup.getTemplate());
-                template = templateDecorator.decorate(template);
-                template = templateService.create(user, template);
+                if (template.getId() == null) {
+                    template.setPublicInAccount(subject.isPublicInAccount());
+                    template.setCloudPlatform(getCloudPlatform(subject, request, template.cloudPlatform()));
+                    templateValidator.validateTemplateRequest(instanceGroup.getTemplate());
+                    template = templateDecorator.decorate(template);
+                    template = templateService.create(user, template);
+                }
                 instanceGroup.setTemplate(template);
             }
             if (instanceGroup.getSecurityGroup() != null) {
                 SecurityGroup securityGroup = instanceGroup.getSecurityGroup();
-                securityGroup.setPublicInAccount(subject.isPublicInAccount());
-                securityGroup.setCloudPlatform(subject.cloudPlatform());
-                securityGroup = securityGroupService.create(user, securityGroup);
-                instanceGroup.setSecurityGroup(securityGroup);
+                if (securityGroup.getId() == null) {
+                    securityGroup.setPublicInAccount(subject.isPublicInAccount());
+                    securityGroup.setCloudPlatform(getCloudPlatform(subject, request, securityGroup.getCloudPlatform()));
+                    securityGroup = securityGroupService.create(user, securityGroup);
+                    instanceGroup.setSecurityGroup(securityGroup);
+                }
             }
         }
     }
 
-    private void prepareDomainIfDefined(Stack subject, Object... data) {
-        IdentityUser user = (IdentityUser) data[DecorationData.USER.ordinal()];
+    private void prepareDomainIfDefined(Stack subject, StackRequest request, IdentityUser user) {
         if (subject.getNetwork() != null) {
             Network network = subject.getNetwork();
-            network.setPublicInAccount(subject.isPublicInAccount());
-            network.setCloudPlatform(subject.cloudPlatform());
-            network = networkService.create(user, network);
+            if (network.getId() == null) {
+                network.setPublicInAccount(subject.isPublicInAccount());
+                network.setCloudPlatform(getCloudPlatform(subject, request, network.cloudPlatform()));
+                network = networkService.create(user, network);
+            }
             subject.setNetwork(network);
         }
         if (subject.getCredential() != null) {
-            Credential credential = subject.getCredential();
-            credential.setPublicInAccount(subject.isPublicInAccount());
-            credential.setCloudPlatform(subject.cloudPlatform());
-            credential = credentialAdapter.init(credential);
-            credential = credentialService.create(user, credential);
-            subject.setCredential(credential);
+            Credential credentialForStack = subject.getCredential();
+            if (credentialForStack.getId() == null) {
+                credentialForStack.setPublicInAccount(subject.isPublicInAccount());
+                credentialForStack.setCloudPlatform(getCloudPlatform(subject, request, credentialForStack.cloudPlatform()));
+                credentialForStack = credentialAdapter.init(credentialForStack);
+                credentialForStack = credentialService.create(user, credentialForStack);
+            }
+            subject.setCredential(credentialForStack);
         }
     }
 
@@ -215,12 +209,25 @@ public class StackDecorator implements Decorator<Stack> {
         }
     }
 
-    private void prepareFlexSubscription(Stack subject, Object[] data) {
-        Long flexId = (Long) data[DecorationData.FLEX_ID.ordinal()];
+    private void prepareFlexSubscription(Stack subject, Long flexId) {
         if (flexId != null) {
             FlexSubscription flexSubscription = flexSubscriptionService.findOneById(flexId);
             subject.setFlexSubscription(flexSubscription);
         }
     }
+
+    private String getCloudPlatform(Stack stack, StackRequest request, String cloudPlatform) {
+        if (!Strings.isNullOrEmpty(cloudPlatform)) {
+            return cloudPlatform;
+        } else if (stack.getCredential() != null && stack.getCredential().getId() != null) {
+            return stack.getCredential().cloudPlatform();
+        } else if (Strings.isNullOrEmpty(stack.cloudPlatform()))  {
+            return stack.cloudPlatform();
+        } else {
+            return request.getCloudPlatform();
+        }
+    }
+
+
 
 }
