@@ -4,26 +4,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonRawValue;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
-import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
-import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.CustomContainerRequest;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
-import com.sequenceiq.cloudbreak.api.model.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
-import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
@@ -37,36 +23,11 @@ public class ClusterV2Request implements JsonEntity {
     @ApiModelProperty(hidden = true)
     private String name;
 
-    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_ID)
-    private Long blueprintId;
-
-    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_NAME)
-    private String blueprintName;
-
     @ApiModelProperty(ClusterModelDescription.EMAIL_NEEDED)
     private Boolean emailNeeded = Boolean.FALSE;
 
     @ApiModelProperty(ClusterModelDescription.EMAIL_TO)
     private String emailTo;
-
-    private GatewayJson gateway;
-
-    @ApiModelProperty(StackModelDescription.ENABLE_SECURITY)
-    private Boolean enableSecurity = Boolean.FALSE;
-
-    @Size(max = 15, min = 5, message = "The length of the username has to be in range of 5 to 15")
-    @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
-            message = "The username can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
-    @NotNull
-    @ApiModelProperty(value = StackModelDescription.USERNAME, required = true)
-    private String userName;
-
-    @NotNull
-    @Size(max = 100, min = 5, message = "The length of the password has to be in range of 5 to 100")
-    @ApiModelProperty(value = StackModelDescription.PASSWORD, required = true)
-    private String password;
-
-    private KerberosRequest kerberos;
 
     @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG_ID)
     private Long ldapConfigId;
@@ -74,23 +35,8 @@ public class ClusterV2Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG)
     private LdapConfigRequest ldapConfig;
 
-    @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)
-    private Boolean validateBlueprint = Boolean.TRUE;
-
-    @Valid
-    @ApiModelProperty(ClusterModelDescription.AMBARI_STACK_DETAILS)
-    private AmbariStackDetailsJson ambariStackDetails;
-
-    @Valid
-    @ApiModelProperty(ClusterModelDescription.AMBARI_REPO_DETAILS)
-    private AmbariRepoDetailsJson ambariRepoDetailsJson;
-
     @ApiModelProperty(ClusterModelDescription.RDSCONFIG_IDS)
     private Set<Long> rdsConfigIds = new HashSet<>();
-
-    @Valid
-    @ApiModelProperty(ClusterModelDescription.AMBARI_DATABASE_DETAILS)
-    private AmbariDatabaseDetailsJson ambariDatabaseDetails;
 
     @Valid
     @ApiModelProperty(ClusterModelDescription.RDS_CONFIGS)
@@ -100,34 +46,16 @@ public class ClusterV2Request implements JsonEntity {
     @ApiModelProperty(StackModelDescription.FILE_SYSTEM)
     private FileSystemRequest fileSystem;
 
-    @ApiModelProperty(ClusterModelDescription.CONFIG_STRATEGY)
-    private ConfigStrategy configStrategy = ConfigStrategy.ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES;
-
-    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_INPUTS)
-    private Set<BlueprintInputJson> blueprintInputs = new HashSet<>();
-
-    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_CUSTOM_PROPERTIES)
-    private String blueprintCustomProperties;
-
-    @ApiModelProperty(ClusterModelDescription.CUSTOM_CONTAINERS)
-    private CustomContainerRequest customContainer;
-
-    @ApiModelProperty(ClusterModelDescription.CUSTOM_QUEUE)
-    private String customQueue;
-
     @ApiModelProperty(ClusterModelDescription.EXECUTOR_TYPE)
     private ExecutorType executorType = ExecutorType.DEFAULT;
 
-    @ApiModelProperty(ClusterModelDescription.CONNECTED_CLUSTER)
-    private ConnectedClusterRequest connectedCluster;
+    @Valid
+    @ApiModelProperty(ClusterModelDescription.AMBARI_REQUEST)
+    private AmbariV2Request ambariRequest;
 
-    public Long getBlueprintId() {
-        return blueprintId;
-    }
-
-    public void setBlueprintId(Long blueprintId) {
-        this.blueprintId = blueprintId;
-    }
+    @Valid
+    @ApiModelProperty(ClusterModelDescription.BYOS_REQUEST)
+    private ByosV2Request byosRequest;
 
     public Boolean getEmailNeeded() {
         return emailNeeded;
@@ -135,54 +63,6 @@ public class ClusterV2Request implements JsonEntity {
 
     public void setEmailNeeded(Boolean emailNeeded) {
         this.emailNeeded = emailNeeded;
-    }
-
-    public Boolean getEnableSecurity() {
-        return enableSecurity;
-    }
-
-    public void setEnableSecurity(Boolean enableSecurity) {
-        this.enableSecurity = enableSecurity;
-    }
-
-    public GatewayJson getGateway() {
-        return gateway;
-    }
-
-    public void setGateway(GatewayJson gateway) {
-        this.gateway = gateway;
-    }
-
-    public boolean getValidateBlueprint() {
-        return validateBlueprint == null ? false : validateBlueprint;
-    }
-
-    public void setValidateBlueprint(Boolean validateBlueprint) {
-        this.validateBlueprint = validateBlueprint;
-    }
-
-    public AmbariStackDetailsJson getAmbariStackDetails() {
-        return ambariStackDetails;
-    }
-
-    public void setAmbariStackDetails(AmbariStackDetailsJson ambariStackDetails) {
-        this.ambariStackDetails = ambariStackDetails;
-    }
-
-    public AmbariRepoDetailsJson getAmbariRepoDetailsJson() {
-        return ambariRepoDetailsJson;
-    }
-
-    public void setAmbariRepoDetailsJson(AmbariRepoDetailsJson ambariRepoDetailsJson) {
-        this.ambariRepoDetailsJson = ambariRepoDetailsJson;
-    }
-
-    public AmbariDatabaseDetailsJson getAmbariDatabaseDetails() {
-        return ambariDatabaseDetails;
-    }
-
-    public void setAmbariDatabaseDetails(AmbariDatabaseDetailsJson ambariDatabaseDetails) {
-        this.ambariDatabaseDetails = ambariDatabaseDetails;
     }
 
     public Set<Long> getRdsConfigIds() {
@@ -201,22 +81,6 @@ public class ClusterV2Request implements JsonEntity {
         this.rdsConfigJsons = rdsConfigJsons;
     }
 
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public FileSystemRequest getFileSystem() {
         return fileSystem;
     }
@@ -233,45 +97,12 @@ public class ClusterV2Request implements JsonEntity {
         this.ldapConfigId = ldapConfigId;
     }
 
-    public ConfigStrategy getConfigStrategy() {
-        return configStrategy;
-    }
-
-    public void setConfigStrategy(ConfigStrategy configStrategy) {
-        this.configStrategy = configStrategy;
-    }
-
     public String getEmailTo() {
         return emailTo;
     }
 
     public void setEmailTo(String emailTo) {
         this.emailTo = emailTo;
-    }
-
-    public Set<BlueprintInputJson> getBlueprintInputs() {
-        return blueprintInputs;
-    }
-
-    public void setBlueprintInputs(Set<BlueprintInputJson> blueprintInputs) {
-        this.blueprintInputs = blueprintInputs;
-    }
-
-    @JsonRawValue
-    public String getBlueprintCustomProperties() {
-        return blueprintCustomProperties;
-    }
-
-    public void setBlueprintCustomProperties(JsonNode blueprintCustomProperties) {
-        this.blueprintCustomProperties = blueprintCustomProperties.toString();
-    }
-
-    public KerberosRequest getKerberos() {
-        return kerberos;
-    }
-
-    public void setKerberos(KerberosRequest kerberos) {
-        this.kerberos = kerberos;
     }
 
     public LdapConfigRequest getLdapConfig() {
@@ -282,44 +113,8 @@ public class ClusterV2Request implements JsonEntity {
         this.ldapConfig = ldapConfig;
     }
 
-    public CustomContainerRequest getCustomContainer() {
-        return customContainer;
-    }
-
-    public String getCustomQueue() {
-        return customQueue;
-    }
-
-    public void setCustomQueue(String customQueue) {
-        this.customQueue = customQueue;
-    }
-
-    public void setCustomContainer(CustomContainerRequest customContainer) {
-        this.customContainer = customContainer;
-    }
-
-    public ConnectedClusterRequest getConnectedCluster() {
-        return connectedCluster;
-    }
-
-    public void setConnectedCluster(ConnectedClusterRequest connectedCluster) {
-        this.connectedCluster = connectedCluster;
-    }
-
-    public ExecutorType getExecutorType() {
-        return executorType;
-    }
-
     public void setExecutorType(ExecutorType executorType) {
         this.executorType = executorType;
-    }
-
-    public String getBlueprintName() {
-        return blueprintName;
-    }
-
-    public void setBlueprintName(String blueprintName) {
-        this.blueprintName = blueprintName;
     }
 
     @JsonIgnore
@@ -332,7 +127,23 @@ public class ClusterV2Request implements JsonEntity {
         this.name = name;
     }
 
-    public void setBlueprintCustomProperties(String blueprintCustomProperties) {
-        this.blueprintCustomProperties = blueprintCustomProperties;
+    public ExecutorType getExecutorType() {
+        return executorType;
+    }
+
+    public AmbariV2Request getAmbariRequest() {
+        return ambariRequest;
+    }
+
+    public void setAmbariRequest(AmbariV2Request ambariRequest) {
+        this.ambariRequest = ambariRequest;
+    }
+
+    public ByosV2Request getByosRequest() {
+        return byosRequest;
+    }
+
+    public void setByosRequest(ByosV2Request byosRequest) {
+        this.byosRequest = byosRequest;
     }
 }

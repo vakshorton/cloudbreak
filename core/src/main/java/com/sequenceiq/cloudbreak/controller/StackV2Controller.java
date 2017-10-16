@@ -189,7 +189,7 @@ public class StackV2Controller extends NotificationController implements StackV2
         if (stackRequest.getClusterRequest() != null) {
             StackValidationRequest stackValidationRequest = conversionService.convert(stackRequest, StackValidationRequest.class);
             StackValidation stackValidation = conversionService.convert(stackValidationRequest, StackValidation.class);
-            stackService.validateStack(stackValidation, stackRequest.getClusterRequest().getValidateBlueprint());
+            stackService.validateStack(stackValidation, stackRequest.getClusterRequest().getAmbariRequest().getValidateBlueprint());
             CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stackValidation.getCredential());
             fileSystemValidator.validateFileSystem(stackValidationRequest.getPlatform(), cloudCredential, stackValidationRequest.getFileSystem());
             clusterCreationService.validate(null, stack, user);

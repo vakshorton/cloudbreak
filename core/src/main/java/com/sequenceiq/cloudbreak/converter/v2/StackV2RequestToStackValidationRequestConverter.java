@@ -35,7 +35,7 @@ public class StackV2RequestToStackValidationRequestConverter extends AbstractCon
     public StackValidationRequest convert(StackV2Request source) {
         ClusterV2Request clusterRequest = source.getClusterRequest();
         StackValidationRequest stackValidationRequest = new StackValidationRequest();
-        stackValidationRequest.setBlueprintId(clusterRequest.getBlueprintId());
+        stackValidationRequest.setBlueprintId(clusterRequest.getAmbariRequest().getBlueprintId());
         stackValidationRequest.setCredentialId(source.getCredentialId());
         stackValidationRequest.setNetworkId(source.getNetworkId());
         stackValidationRequest.setPlatform(source.getCloudPlatform());
@@ -44,8 +44,8 @@ public class StackV2RequestToStackValidationRequestConverter extends AbstractCon
             stackValidationRequest.setCredentialName(source.getCredentialName());
             stackValidationRequest.setCredentialId(credential.getId());
         }
-        if (!Strings.isNullOrEmpty(clusterRequest.getBlueprintName())) {
-            Blueprint blueprint = blueprintService.get(clusterRequest.getBlueprintName(), source.getAccount());
+        if (!Strings.isNullOrEmpty(clusterRequest.getAmbariRequest().getBlueprintName())) {
+            Blueprint blueprint = blueprintService.get(clusterRequest.getAmbariRequest().getBlueprintName(), source.getAccount());
             stackValidationRequest.setBlueprintId(blueprint.getId());
         }
         stackValidationRequest.setFileSystem(source.getClusterRequest().getFileSystem());

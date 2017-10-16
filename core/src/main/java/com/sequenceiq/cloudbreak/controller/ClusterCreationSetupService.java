@@ -104,6 +104,22 @@ public class ClusterCreationSetupService {
 
         fileSystemValidator.validateFileSystem(stack.cloudPlatform(), cloudCredential, request.getFileSystem());
     }
+
+    public Cluster prepare(ClusterV2Request request, List<InstanceGroupV2Request> instanceGroupV2Requests,Stack stack, IdentityUser user) throws Exception {
+        Cluster cluster = conversionService.convert(request, Cluster.class);
+        cluster = clusterDecorator.decorate(cluster, stack.getId(), user,
+                request.getAmbariRequest().getBlueprintId(), hostGroupRequests(instanceGroupV2Requests), request.getAmbariRequest().getValidateBlueprint(),
+                request.getRdsConfigIds(), request.getLdapConfigId(),
+                null, request.getRdsConfigJsons(),
+                request.getLdapConfig(), request.getAmbariRequest().getConnectedCluster(), request.getAmbariRequest().getBlueprintName());
+        List<ClusterComponent> components = new ArrayList<>();
+        components = addAmbariRepoConfig(stack.getId(), components, request.getAmbariRequest().getAmbariRepoDetailsJson(), cluster);
+        components = addHDPRepoConfig(stack.getId(), components, request.getAmbariRequest().getAmbariStackDetails(), null,
+                request.getAmbariRequest().getBlueprintId(), request.getAmbariRequest().getBlueprintName(), cluster, user);
+        components = addAmbariDatabaseConfig(components, request.getAmbariRequest().getAmbariDatabaseDetails(), cluster);
+        return clusterService.create(user, stack.getId(), cluster, components);
+    }
+
     public Cluster prepare(ClusterRequest request, Stack stack, IdentityUser user) throws Exception {
         Cluster cluster = conversionService.convert(request, Cluster.class);
         cluster = clusterDecorator.decorate(cluster, stack.getId(), user, request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
@@ -208,5 +224,6 @@ public class ClusterCreationSetupService {
         components.add(component);
         return components;
     }
+
 
 }

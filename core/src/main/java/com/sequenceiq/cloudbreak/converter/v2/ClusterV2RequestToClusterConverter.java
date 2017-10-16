@@ -43,15 +43,15 @@ public class ClusterV2RequestToClusterConverter extends AbstractConversionServic
         Cluster cluster = new Cluster();
         cluster.setStatus(REQUESTED);
         cluster.setEmailNeeded(source.getEmailNeeded());
-        cluster.setUserName(source.getUserName());
-        cluster.setPassword(source.getPassword());
+        cluster.setUserName(source.getAmbariRequest().getUserName());
+        cluster.setPassword(source.getAmbariRequest().getPassword());
         cluster.setExecutorType(source.getExecutorType());
-        Boolean enableSecurity = source.getEnableSecurity();
+        Boolean enableSecurity = source.getAmbariRequest().getEnableSecurity();
         cluster.setSecure(enableSecurity == null ? Boolean.FALSE : enableSecurity);
         convertKnox(source, cluster);
-        KerberosRequest kerberos = source.getKerberos();
+        KerberosRequest kerberos = source.getAmbariRequest().getKerberos();
         KerberosConfig kerberosConfig = new KerberosConfig();
-        if (source.getKerberos() != null) {
+        if (source.getAmbariRequest().getKerberos() != null) {
             kerberosConfig.setKerberosMasterKey(kerberos.getMasterKey());
             kerberosConfig.setKerberosAdmin(kerberos.getAdmin());
             kerberosConfig.setKerberosPassword(kerberos.getPassword());
@@ -63,7 +63,7 @@ public class ClusterV2RequestToClusterConverter extends AbstractConversionServic
             kerberosConfig.setKerberosContainerDn(kerberos.getContainerDn());
         }
         cluster.setKerberosConfig(kerberosConfig);
-        cluster.setConfigStrategy(source.getConfigStrategy());
+        cluster.setConfigStrategy(source.getAmbariRequest().getConfigStrategy());
         cluster.setEmailTo(source.getEmailTo());
         FileSystemBase fileSystem = source.getFileSystem();
         cluster.setCloudbreakAmbariPassword(PasswordUtil.generatePassword());
@@ -72,11 +72,11 @@ public class ClusterV2RequestToClusterConverter extends AbstractConversionServic
         if (fileSystem != null) {
             cluster.setFileSystem(getConversionService().convert(fileSystem, FileSystem.class));
         }
-        Map<String, String> inputs = source.getBlueprintInputs() == null ? Collections.emptyMap() : convertBlueprintInputJsons(source.getBlueprintInputs());
+        Map<String, String> inputs = source.getAmbariRequest().getBlueprintInputs() == null ? Collections.emptyMap() : convertBlueprintInputJsons(source.getAmbariRequest().getBlueprintInputs());
         try {
             cluster.setBlueprintInputs(new Json(inputs));
-            if (source.getBlueprintCustomProperties() != null) {
-                cluster.setBlueprintCustomProperties(source.getBlueprintCustomProperties());
+            if (source.getAmbariRequest().getBlueprintCustomProperties() != null) {
+                cluster.setBlueprintCustomProperties(source.getAmbariRequest().getBlueprintCustomProperties());
             } else {
                 cluster.setBlueprintCustomProperties(null);
             }
@@ -84,7 +84,7 @@ public class ClusterV2RequestToClusterConverter extends AbstractConversionServic
             cluster.setBlueprintInputs(null);
         }
         try {
-            Json json = new Json(convertContainerConfigs(source.getCustomContainer()));
+            Json json = new Json(convertContainerConfigs(source.getByosRequest().getCustomContainer()));
             cluster.setCustomContainerDefinition(json);
         } catch (JsonProcessingException ignored) {
             cluster.setCustomContainerDefinition(null);
@@ -94,8 +94,8 @@ public class ClusterV2RequestToClusterConverter extends AbstractConversionServic
 
     private void convertAttributes(ClusterV2Request source, Cluster cluster) {
         Map<String, Object> attributesMap = new HashMap<>();
-        if (source.getCustomQueue() != null) {
-            attributesMap.put(ClusterAttributes.CUSTOM_QUEUE.name(), source.getCustomQueue());
+        if (source.getByosRequest() != null && source.getByosRequest().getCustomQueue() != null) {
+            attributesMap.put(ClusterAttributes.CUSTOM_QUEUE.name(), source.getByosRequest().getCustomQueue());
         }
         try {
             cluster.setAttributes(new Json(attributesMap));
@@ -105,7 +105,7 @@ public class ClusterV2RequestToClusterConverter extends AbstractConversionServic
     }
 
     private void convertKnox(ClusterV2Request source, Cluster cluster) {
-        GatewayJson cloudGatewayJson = source.getGateway();
+        GatewayJson cloudGatewayJson = source.getAmbariRequest().getGateway();
         Gateway gateway = new Gateway();
         gateway.setEnableGateway(Boolean.FALSE);
         gateway.setTopologyName("services");
