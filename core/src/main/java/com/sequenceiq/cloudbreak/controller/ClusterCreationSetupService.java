@@ -105,8 +105,6 @@ public class ClusterCreationSetupService {
         fileSystemValidator.validateFileSystem(stack.cloudPlatform(), cloudCredential, request.getFileSystem());
     }
 
-<<<<<<< HEAD
-=======
     public void validate(ClusterV2Request request, Stack stack, IdentityUser user) {
         if (request.getAmbariRequest().getEnableSecurity() && request.getAmbariRequest().getKerberos() == null) {
             throw new BadRequestException("If the security is enabled the kerberos parameters cannot be empty");
@@ -123,37 +121,6 @@ public class ClusterCreationSetupService {
 
     public Cluster prepare(ClusterRequest request, Stack stack, IdentityUser user) throws Exception {
         Cluster cluster = conversionService.convert(request, Cluster.class);
-        cluster = clusterDecorator.decorate(cluster, stack.getId(), user,
-                request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
-                request.getRdsConfigIds(), request.getLdapConfigId(),
-                request.getBlueprint(), request.getRdsConfigJsons(),
-                request.getLdapConfig(), request.getConnectedCluster(), request.getBlueprintName());
-        List<ClusterComponent> components = new ArrayList<>();
-        components = addAmbariRepoConfig(stack.getId(), components, request.getAmbariRepoDetailsJson(), cluster);
-        components = addHDPRepoConfig(stack.getId(), components, request.getAmbariStackDetails(), request.getBlueprint(),
-                request.getBlueprintId(), request.getBlueprintName(), cluster, user);
-        components = addAmbariDatabaseConfig(components, request.getAmbariDatabaseDetails(), cluster);
-        return clusterService.create(user, stack.getId(), cluster, components);
-    }
-
->>>>>>> some refactor
-    public Cluster prepare(ClusterV2Request request, List<InstanceGroupV2Request> instanceGroupV2Requests,Stack stack, IdentityUser user) throws Exception {
-        Cluster cluster = conversionService.convert(request, Cluster.class);
-        cluster = clusterDecorator.decorate(cluster, stack.getId(), user,
-                request.getAmbariRequest().getBlueprintId(), hostGroupRequests(instanceGroupV2Requests), request.getAmbariRequest().getValidateBlueprint(),
-                request.getRdsConfigIds(), request.getLdapConfigId(),
-                null, request.getRdsConfigJsons(),
-                request.getLdapConfig(), request.getAmbariRequest().getConnectedCluster(), request.getAmbariRequest().getBlueprintName());
-        List<ClusterComponent> components = new ArrayList<>();
-        components = addAmbariRepoConfig(stack.getId(), components, request.getAmbariRequest().getAmbariRepoDetailsJson(), cluster);
-        components = addHDPRepoConfig(stack.getId(), components, request.getAmbariRequest().getAmbariStackDetails(), null,
-                request.getAmbariRequest().getBlueprintId(), request.getAmbariRequest().getBlueprintName(), cluster, user);
-        components = addAmbariDatabaseConfig(components, request.getAmbariRequest().getAmbariDatabaseDetails(), cluster);
-        return clusterService.create(user, stack.getId(), cluster, components);
-    }
-
-    public Cluster prepare(ClusterRequest request, Stack stack, IdentityUser user) throws Exception {
-        Cluster cluster = conversionService.convert(request, Cluster.class);
         cluster = clusterDecorator.decorate(cluster, stack.getId(), user, request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
                 request.getRdsConfigIds(), request.getLdapConfigId(), request.getBlueprint(), request.getRdsConfigJsons(), request.getLdapConfig(),
                 request.getConnectedCluster(), request.getBlueprintName());
@@ -164,17 +131,52 @@ public class ClusterCreationSetupService {
                 && c.getName().equalsIgnoreCase(ComponentType.AMBARI_REPO_DETAILS.name())).findAny();
         Optional<Component> stackHdpRepoConfig = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.HDP_REPO_DETAILS)
                 && c.getName().equalsIgnoreCase(ComponentType.HDP_REPO_DETAILS.name())).findAny();
-        components = addAmbariRepoConfig(stackAmbariRepoConfig, components, request, cluster);
-        components = addHDPRepoConfig(stackHdpRepoConfig, components, request, cluster, user);
-        components = addAmbariDatabaseConfig(components, request, cluster);
+        components = addAmbariRepoConfig(stackAmbariRepoConfig, components, request.getAmbariRepoDetailsJson(), cluster);
+        components = addHDPRepoConfig(stackHdpRepoConfig, components, request.getAmbariStackDetails(), cluster, user,
+                request.getBlueprint(), request.getBlueprintId(), request.getBlueprintName());
+        components = addAmbariDatabaseConfig(components, request.getAmbariDatabaseDetails(), cluster);
         return clusterService.create(user, stack, cluster, components);
     }
 
+
+    public Cluster prepare(ClusterV2Request request, Stack stack, IdentityUser user, List<InstanceGroupV2Request> instanceGroups) throws Exception {
+        Cluster cluster = conversionService.convert(request, Cluster.class);
+        cluster = clusterDecorator.decorate(cluster,
+                stack.getId(),
+                user,
+                request.getAmbariRequest().getBlueprintId(),
+                hostGroupRequests(instanceGroups),
+                request.getAmbariRequest().getValidateBlueprint(),
+                request.getRdsConfigIds(),
+                request.getLdapConfigId(),
+                null,
+                request.getRdsConfigJsons(),
+                request.getLdapConfig(),
+                request.getAmbariRequest().getConnectedCluster(),
+                request.getAmbariRequest().getBlueprintName());
+        List<ClusterComponent> components = new ArrayList<>();
+        Set<Component> allComponent = componentConfigProvider.getAllComponentsByStackIdAndType(stack.getId(),
+                Sets.newHashSet(ComponentType.AMBARI_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS));
+        Optional<Component> stackAmbariRepoConfig = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.AMBARI_REPO_DETAILS)
+                && c.getName().equalsIgnoreCase(ComponentType.AMBARI_REPO_DETAILS.name())).findAny();
+        Optional<Component> stackHdpRepoConfig = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.HDP_REPO_DETAILS)
+                && c.getName().equalsIgnoreCase(ComponentType.HDP_REPO_DETAILS.name())).findAny();
+        components = addAmbariRepoConfig(stackAmbariRepoConfig, components, request.getAmbariRequest().getAmbariRepoDetailsJson(), cluster);
+        components = addHDPRepoConfig(stackHdpRepoConfig, components, request.getAmbariRequest().getAmbariStackDetails(), cluster, user,
+                null, request.getAmbariRequest().getBlueprintId(), request.getAmbariRequest().getBlueprintName());
+        components = addAmbariDatabaseConfig(components, request.getAmbariRequest().getAmbariDatabaseDetails(), cluster);
+        return clusterService.create(user, stack, cluster, components);
+    }
+
+    private Set<HostGroupRequest> hostGroupRequests(List<InstanceGroupV2Request> instanceGroups){
+        return instanceGroups.stream()
+                .map(instanceGroup -> conversionService.convert(instanceGroup, HostGroupRequest.class)).collect(Collectors.toSet());
+    }
+
     private List<ClusterComponent> addAmbariRepoConfig(Optional<Component> stackAmbariRepoConfig, List<ClusterComponent> components,
-            ClusterRequest request, Cluster cluster) throws JsonProcessingException {
+            AmbariRepoDetailsJson ambariRepoDetailsJson, Cluster cluster) throws JsonProcessingException {
         // If it is not predefined in image catalog
         if (!stackAmbariRepoConfig.isPresent()) {
-            AmbariRepoDetailsJson ambariRepoDetailsJson = request.getAmbariRepoDetailsJson();
             if (ambariRepoDetailsJson == null) {
                 ambariRepoDetailsJson = new AmbariRepoDetailsJson();
             }
@@ -188,17 +190,17 @@ public class ClusterCreationSetupService {
         return components;
     }
 
-    private List<ClusterComponent> addHDPRepoConfig(Optional<Component> stackHdpRepoConfig,
-            List<ClusterComponent> components, ClusterRequest request, Cluster cluster, IdentityUser user) throws JsonProcessingException {
+    private List<ClusterComponent> addHDPRepoConfig(Optional<Component> stackHdpRepoConfig, List<ClusterComponent> components,
+            AmbariStackDetailsJson ambariStackDetailsJson, Cluster cluster, IdentityUser user,
+            BlueprintRequest blueprintRequest, Long blueprintId, String blueprintName) throws JsonProcessingException {
         if (!stackHdpRepoConfig.isPresent()) {
-            AmbariStackDetailsJson ambariStackDetailsJson = request.getAmbariStackDetails();
             if (ambariStackDetailsJson != null) {
                 HDPRepo hdpRepo = conversionService.convert(ambariStackDetailsJson, HDPRepo.class);
                 ClusterComponent component = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, new Json(hdpRepo), cluster);
                 components.add(component);
             } else {
                 ClusterComponent hdpRepoComponent = new ClusterComponent(ComponentType.HDP_REPO_DETAILS,
-                        new Json(defaultHDPInfo(request, user).getRepo()), cluster);
+                        new Json(defaultHDPInfo(blueprintRequest, blueprintId, blueprintName, user).getRepo()), cluster);
                 components.add(hdpRepoComponent);
             }
         } else {
@@ -208,17 +210,17 @@ public class ClusterCreationSetupService {
         return components;
     }
 
-    private HDPInfo defaultHDPInfo(ClusterRequest clusterRequest, IdentityUser user) {
+    private HDPInfo defaultHDPInfo(BlueprintRequest blueprintRequest, Long blueprintId, String blueprintName, IdentityUser user) {
         try {
             JsonNode root;
-            if (clusterRequest.getBlueprintId() != null) {
-                Blueprint blueprint = blueprintService.get(clusterRequest.getBlueprintId());
+            if (blueprintId != null) {
+                Blueprint blueprint = blueprintService.get(blueprintId);
                 root = JsonUtil.readTree(blueprint.getBlueprintText());
-            } else if (clusterRequest.getBlueprintName() != null) {
-                Blueprint blueprint = blueprintService.get(clusterRequest.getBlueprintName(), user.getAccount());
+            } else if (blueprintName != null) {
+                Blueprint blueprint = blueprintService.get(blueprintName, user.getAccount());
                 root = JsonUtil.readTree(blueprint.getBlueprintText());
             } else {
-                root = JsonUtil.readTree(clusterRequest.getBlueprint().getAmbariBlueprint());
+                root = JsonUtil.readTree(blueprintRequest.getAmbariBlueprint());
             }
             if (root != null) {
                 String stackVersion = blueprintUtils.getBlueprintHdpVersion(root);
@@ -245,9 +247,8 @@ public class ClusterCreationSetupService {
         return defaultHDPEntries.getEntries().values().iterator().next();
     }
 
-    private List<ClusterComponent> addAmbariDatabaseConfig(List<ClusterComponent> components, ClusterRequest request, Cluster cluster)
+    private List<ClusterComponent> addAmbariDatabaseConfig(List<ClusterComponent> components, AmbariDatabaseDetailsJson ambariRepoDetailsJson, Cluster cluster)
             throws JsonProcessingException {
-        AmbariDatabaseDetailsJson ambariRepoDetailsJson = request.getAmbariDatabaseDetails();
         if (ambariRepoDetailsJson == null) {
             ambariRepoDetailsJson = new AmbariDatabaseDetailsJson();
         }
@@ -256,6 +257,5 @@ public class ClusterCreationSetupService {
         components.add(component);
         return components;
     }
-
 
 }

@@ -122,7 +122,7 @@ public class StackPreparatorService {
                 Optional.ofNullable(stackV2Request.getCustomImage()));
 
         if (stackRequestIncludesClusterRequest(stackV2Request)) {
-            Cluster cluster = clusterCreationService.prepare(stackV2Request.getClusterRequest(), stackV2Request.getInstanceGroups(), stack, user);
+            Cluster cluster = clusterCreationService.prepare(stackV2Request.getClusterRequest(), stack, user, stackV2Request.getInstanceGroups());
             stack.setCluster(cluster);
         }
         return conversionService.convert(stack, StackResponse.class);
