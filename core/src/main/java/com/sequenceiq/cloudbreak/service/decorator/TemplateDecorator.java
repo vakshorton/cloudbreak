@@ -12,15 +12,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Suppliers;
+import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 
 @Component
-public class TemplateDecorator implements Decorator<Template> {
+public class TemplateDecorator implements Decorator<Template, TemplateRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TemplateDecorator.class);
 
@@ -34,7 +36,7 @@ public class TemplateDecorator implements Decorator<Template> {
             Suppliers.memoize(() -> cloudParameterService.getDiskTypes().getDiskMappings());
 
     @Override
-    public Template decorate(Template subject, Object... data) {
+    public Template decorate(Template subject, TemplateRequest request, IdentityUser user, Object... data) {
         Supplier<VolumeParameterConfig> config = Suppliers.memoize(() -> {
             try {
                 Platform platform = Platform.platform(subject.cloudPlatform());

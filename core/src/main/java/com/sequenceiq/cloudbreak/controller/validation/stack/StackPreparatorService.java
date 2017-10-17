@@ -39,7 +39,7 @@ public class StackPreparatorService {
     private ConversionService conversionService;
 
     @Autowired
-    private Decorator<Stack> stackDecorator;
+    private Decorator<Stack, StackV2Request> stackDecorator;
 
     @Autowired
     private AccountAndUserPermissionEvaluator accountAndUserPermissionEvaluator;
@@ -86,12 +86,7 @@ public class StackPreparatorService {
 
         MDCBuilder.buildMdcContext(stack);
 
-        stack = stackDecorator.decorate(stack,
-                stackV2Request.getCredentialId(),
-                stackV2Request.getNetworkId(),
-                user,
-                stackV2Request.getFlexId(),
-                stackV2Request.getCredentialName());
+        stack = stackDecorator.decorate(stack, stackV2Request, user);
 
         validateAccountPreferences(stack, user);
         stack.setPublicInAccount(publicInAccount);

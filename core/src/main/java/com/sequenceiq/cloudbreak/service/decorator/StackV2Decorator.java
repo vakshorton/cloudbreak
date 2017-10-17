@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
-import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
@@ -38,9 +38,9 @@ import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.ConsulServers;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 @Service
-public class StackDecorator implements Decorator<Stack, StackRequest> {
+public class StackV2Decorator implements Decorator<Stack, StackV2Request> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackDecorator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackV2Decorator.class);
 
     private static final double ONE_HUNDRED = 100.0;
 
@@ -77,7 +77,7 @@ public class StackDecorator implements Decorator<Stack, StackRequest> {
 
 
     @Override
-    public Stack decorate(Stack subject, StackRequest request, IdentityUser user, Object... data) {
+    public Stack decorate(Stack subject, StackV2Request request, IdentityUser user, Object... data) {
         prepareDomainIfDefined(subject, user);
         Object credentialId = request.getCredentialId();
         String credentialName = request.getCredentialName();

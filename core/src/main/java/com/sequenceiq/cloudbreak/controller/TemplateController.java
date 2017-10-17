@@ -31,7 +31,7 @@ public class TemplateController extends NotificationController implements Templa
     private TemplateValidator templateValidator;
 
     @Autowired
-    private Decorator<Template> templateDecorator;
+    private Decorator<Template, TemplateRequest> templateDecorator;
 
     @Autowired
     @Qualifier("conversionService")
@@ -101,7 +101,7 @@ public class TemplateController extends NotificationController implements Templa
     private TemplateResponse createTemplate(IdentityUser user, TemplateRequest templateRequest, boolean publicInAccount) {
         Template template = convert(templateRequest, publicInAccount);
         templateValidator.validateTemplateRequest(template);
-        template = templateDecorator.decorate(template);
+        template = templateDecorator.decorate(template, templateRequest, user);
         template = templateService.create(user, template);
         notify(user, ResourceEvent.TEMPLATE_CREATED);
         return conversionService.convert(template, TemplateResponse.class);

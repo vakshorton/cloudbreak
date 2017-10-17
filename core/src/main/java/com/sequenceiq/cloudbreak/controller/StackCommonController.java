@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
+import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
@@ -58,7 +59,7 @@ public class StackCommonController extends NotificationController implements Sta
     private ConversionService conversionService;
 
     @Autowired
-    private Decorator<Stack> stackDecorator;
+    private Decorator<Stack, StackRequest> stackDecorator;
 
     @Autowired
     private AccountAndUserPermissionEvaluator accountAndUserPermissionEvaluator;
@@ -104,7 +105,8 @@ public class StackCommonController extends NotificationController implements Sta
 
     @Override
     public StackResponse get(Long id, Set<String> entries) {
-        return stackService.getJsonById(id, entries);
+        IdentityUser user = authenticatedUserService.getCbUser();
+        return stackService.getJsonById(id, entries, user);
     }
 
     @Override

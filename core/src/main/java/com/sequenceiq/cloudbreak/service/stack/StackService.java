@@ -145,7 +145,7 @@ public class StackService {
     private SecurityConfigRepository securityConfigRepository;
 
     @Inject
-    private Decorator<StackResponse> stackResponseDecorator;
+    private Decorator<StackResponse, Stack> stackResponseDecorator;
 
     @Inject
     private OpenSshPublicKeyValidator rsaPublicKeyValidator;
@@ -186,10 +186,10 @@ public class StackService {
         return stackRepository.findForUser(owner);
     }
 
-    public StackResponse getJsonById(Long id, Set<String> entry) {
+    public StackResponse getJsonById(Long id, Set<String> entry, IdentityUser user) {
         Stack stack = get(id);
         StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
-        stackResponse = stackResponseDecorator.decorate(stackResponse, entry, stack);
+        stackResponse = stackResponseDecorator.decorate(stackResponse, stack, user, entry);
         return stackResponse;
     }
 
@@ -259,7 +259,7 @@ public class StackService {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
         StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
-        stackResponse = stackResponseDecorator.decorate(stackResponse, entries, stack);
+        stackResponse = stackResponseDecorator.decorate(stackResponse, stack, identityUser, entries);
         return stackResponse;
     }
 
@@ -270,7 +270,7 @@ public class StackService {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
         StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
-        stackResponse = stackResponseDecorator.decorate(stackResponse, entries, stack);
+        stackResponse = stackResponseDecorator.decorate(stackResponse, stack, identityUser, entries);
         return stackResponse;
     }
 

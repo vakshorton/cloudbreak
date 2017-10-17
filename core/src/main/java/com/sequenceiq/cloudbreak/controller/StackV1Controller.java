@@ -52,7 +52,7 @@ public class StackV1Controller extends NotificationController implements StackV1
     private ConversionService conversionService;
 
     @Autowired
-    private Decorator<Stack> stackDecorator;
+    private Decorator<Stack, StackRequest> stackDecorator;
 
     @Autowired
     private AccountAndUserPermissionEvaluator accountAndUserPermissionEvaluator;
@@ -104,8 +104,7 @@ public class StackV1Controller extends NotificationController implements StackV1
         Stack stack = conversionService.convert(stackRequest, Stack.class);
         MDCBuilder.buildMdcContext(stack);
         stack = stackSensitiveDataPropagator.propagate(stackRequest.getCredentialSource(), stack, user);
-        stack = stackDecorator.decorate(stack, stackRequest.getCredentialId(), stackRequest.getNetworkId(), user,
-                stackRequest.getFlexId(), stackRequest.getCredentialName());
+        stack = stackDecorator.decorate(stack,stackRequest, user);
         stack.setPublicInAccount(publicInAccount);
         validateAccountPreferences(stack, user);
 

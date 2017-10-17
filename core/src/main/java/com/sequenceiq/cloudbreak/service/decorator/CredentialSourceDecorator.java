@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 @Component
-public class CredentialSourceDecorator implements Decorator<Credential> {
+public class CredentialSourceDecorator implements Decorator<Credential, CredentialSourceRequest> {
 
     @Inject
     private CredentialService credentialService;
@@ -28,23 +28,19 @@ public class CredentialSourceDecorator implements Decorator<Credential> {
     private MissingResourceNameGenerator missingResourceNameGenerator;
 
     @Override
-    public Credential decorate(Credential credential, Object... data) {
-        if (null == data || data.length == 0) {
-            return credential;
-        } else if (credential == null) {
-            CredentialSourceRequest credentialSourceRequest = (CredentialSourceRequest) data[DecorationData.SOURCE_CREDENTIAL.ordinal()];
-            IdentityUser identityUser = (IdentityUser) data[DecorationData.IDENTITY_USER.ordinal()];
-            if (!Strings.isNullOrEmpty(credentialSourceRequest.getSourceName())) {
-                credential = credentialService.get(credentialSourceRequest.getSourceName(), identityUser.getAccount());
+    public Credential decorate(Credential credential, CredentialSourceRequest request, IdentityUser user, Object... data) {
+        if (credential == null) {
+            if (!Strings.isNullOrEmpty(request.getSourceName())) {
+                credential = credentialService.get(request.getSourceName(), user.getAccount());
             } else {
-                credential = credentialService.get(credentialSourceRequest.getSourceId());
+                credential = credentialService.get(request.getSourceId());
             }
 
             if (credential == null) {
                 throw new BadRequestException("Source credential does not exist!");
             } else {
                 Map<String, Object> map = credential.getAttributes().getMap();
-                for (Entry<String, Object> stringObjectEntry : credentialSourceRequest.getParameters().entrySet()) {
+                for (Entry<String, Object> stringObjectEntry : request.getParameters().entrySet()) {
                     map.put(stringObjectEntry.getKey(), stringObjectEntry.getValue().toString());
                 }
                 credential.setId(null);
@@ -57,10 +53,5 @@ public class CredentialSourceDecorator implements Decorator<Credential> {
             }
         }
         return credential;
-    }
-
-    private enum DecorationData {
-        SOURCE_CREDENTIAL,
-        IDENTITY_USER
     }
 }

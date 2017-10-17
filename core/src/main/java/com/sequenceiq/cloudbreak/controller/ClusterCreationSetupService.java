@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
+import com.sequenceiq.cloudbreak.service.decorator.ClusterV2Decorator;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @org.springframework.stereotype.Component
@@ -73,6 +74,9 @@ public class ClusterCreationSetupService {
 
     @Autowired
     private ClusterDecorator clusterDecorator;
+
+    @Autowired
+    private ClusterV2Decorator clusterV2Decorator;
 
     @Autowired
     private ClusterService clusterService;
@@ -117,9 +121,7 @@ public class ClusterCreationSetupService {
 
     public Cluster prepare(ClusterRequest request, Stack stack, IdentityUser user) throws Exception {
         Cluster cluster = conversionService.convert(request, Cluster.class);
-        cluster = clusterDecorator.decorate(cluster, stack.getId(), user, request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
-                request.getRdsConfigIds(), request.getLdapConfigId(), request.getBlueprint(), request.getRdsConfigJsons(), request.getLdapConfig(),
-                request.getConnectedCluster(), request.getBlueprintName());
+        cluster = clusterDecorator.decorate(cluster, request, user);
         List<ClusterComponent> components = new ArrayList<>();
         Set<Component> allComponent = componentConfigProvider.getAllComponentsByStackIdAndType(stack.getId(),
                 Sets.newHashSet(ComponentType.AMBARI_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS));
@@ -137,19 +139,7 @@ public class ClusterCreationSetupService {
 
     public Cluster prepare(ClusterV2Request request, Stack stack, IdentityUser user, List<InstanceGroupV2Request> instanceGroups) throws Exception {
         Cluster cluster = conversionService.convert(request, Cluster.class);
-        cluster = clusterDecorator.decorate(cluster,
-                stack.getId(),
-                user,
-                request.getAmbariRequest().getBlueprintId(),
-                hostGroupRequests(instanceGroups),
-                request.getAmbariRequest().getValidateBlueprint(),
-                request.getRdsConfigIds(),
-                request.getLdapConfigId(),
-                null,
-                request.getRdsConfigJsons(),
-                request.getLdapConfig(),
-                request.getAmbariRequest().getConnectedCluster(),
-                request.getAmbariRequest().getBlueprintName());
+        cluster = clusterV2Decorator.decorate(cluster, request, user, stack.getId(), hostGroupRequests(instanceGroups));
         List<ClusterComponent> components = new ArrayList<>();
         Set<Component> allComponent = componentConfigProvider.getAllComponentsByStackIdAndType(stack.getId(),
                 Sets.newHashSet(ComponentType.AMBARI_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS));

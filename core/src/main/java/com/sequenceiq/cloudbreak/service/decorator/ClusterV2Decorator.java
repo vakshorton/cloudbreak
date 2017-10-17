@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -17,13 +16,12 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
-import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
-import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.cloudbreak.cluster.ambari.validator.BlueprintValidator;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.RdsType;
@@ -47,12 +45,13 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
-public class ClusterDecorator implements Decorator<Cluster, ClusterRequest> {
+public class ClusterV2Decorator implements Decorator<Cluster, ClusterV2Request> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterDecorator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterV2Decorator.class);
 
     private enum DecorationData {
-        STACK_ID
+        STACK_ID,
+        HOSTGROUPS
     }
 
     @Inject
@@ -86,34 +85,28 @@ public class ClusterDecorator implements Decorator<Cluster, ClusterRequest> {
     private RdsConnectionValidator rdsConnectionValidator;
 
     @Override
-    public Cluster decorate(Cluster subject, ClusterRequest request, IdentityUser user, Object... data) {
+    public Cluster decorate(Cluster subject, ClusterV2Request request, IdentityUser user, Object... data) {
         Long stackId = (Long) data[DecorationData.STACK_ID.ordinal()];
-        Long blueprintId = request.getBlueprintId();
+        Long blueprintId = request.getAmbariRequest().getBlueprintId();
         Long ldapConfigId = request.getLdapConfigId();
-        Set<HostGroupRequest> hostGroupsJsons = request.getHostGroups();
-        BlueprintRequest requestBlueprint = request.getBlueprint();
+        Set<HostGroupRequest> hostGroupsJsons = (Set<HostGroupRequest>) data[DecorationData.HOSTGROUPS.ordinal()];
         Set<RDSConfigRequest> requestRdsConfigs = request.getRdsConfigJsons();
         LdapConfigRequest ldapConfigRequest = request.getLdapConfig();
         Set<Long> rdsConfigIds = request.getRdsConfigIds();
-        ConnectedClusterRequest connectedClusterRequest = request.getConnectedCluster();
-        String blueprintName = request.getBlueprintName();
+        ConnectedClusterRequest connectedClusterRequest = request.getAmbariRequest().getConnectedCluster();
+        String blueprintName = request.getAmbariRequest().getBlueprintName();
 
         Stack stack = stackService.getByIdWithLists(stackId);
 
         if (blueprintId != null) {
             subject.setBlueprint(blueprintService.get(blueprintId));
-        } else if (requestBlueprint != null) {
-            Blueprint blueprint = conversionService.convert(requestBlueprint, Blueprint.class);
-            blueprint.setPublicInAccount(stack.isPublicInAccount());
-            blueprint = blueprintService.create(user, blueprint, new ArrayList<>());
-            subject.setBlueprint(blueprint);
         } else if (!Strings.isNullOrEmpty(blueprintName)) {
             subject.setBlueprint(blueprintService.get(blueprintName, user.getAccount()));
         } else {
             throw new BadRequestException("Blueprint does not configured for the cluster!");
         }
         subject.setHostGroups(convertHostGroupsFromJson(stack, user, subject, hostGroupsJsons));
-        boolean validate = request.getValidateBlueprint();
+        boolean validate = request.getAmbariRequest().getValidateBlueprint();
         if (validate) {
             Blueprint blueprint = blueprintId != null ? blueprintService.get(blueprintId) : subject.getBlueprint();
             blueprintValidator.validateBlueprintForStack(blueprint, subject.getHostGroups(), stack.getInstanceGroups());

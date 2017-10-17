@@ -50,7 +50,7 @@ public class ClusterController implements ClusterEndpoint {
     private ConversionService conversionService;
 
     @Autowired
-    private Decorator<HostGroup> hostGroupDecorator;
+    private Decorator<HostGroup, HostGroupRequest> hostGroupDecorator;
 
     @Autowired
     private ClusterService clusterService;
@@ -202,8 +202,7 @@ public class ClusterController implements ClusterEndpoint {
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupRequest json : updateJson.getHostgroups()) {
             HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
-            hostGroup = hostGroupDecorator.decorate(hostGroup, stackId, user, json.getConstraint(), json.getRecipeIds(), false, json.getRecipes(),
-                    false);
+            hostGroup = hostGroupDecorator.decorate(hostGroup, json, user);
             hostGroups.add(hostGroup);
         }
         AmbariStackDetailsJson stackDetails = updateJson.getAmbariStackDetails();
