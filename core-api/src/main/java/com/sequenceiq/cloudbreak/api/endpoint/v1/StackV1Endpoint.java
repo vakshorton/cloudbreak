@@ -7,8 +7,10 @@ import java.util.Set;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -35,9 +37,15 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "/v1/stacks", description = ControllerDescription.STACK_DESCRIPTION, protocols = "http,https")
 public interface StackV1Endpoint extends StackEndpoint {
 
+    @POST
+    @Path("user")
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "postPrivateStack")
     StackResponse postPrivate(@Valid StackRequest stackRequest) throws Exception;
 
+    @POST
+    @Path("user")
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "postPublicStack")
     StackResponse postPublic(@Valid StackRequest stackRequest) throws Exception;
 

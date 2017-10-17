@@ -37,7 +37,6 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "/v2/stacks", description = ControllerDescription.STACK_DESCRIPTION, protocols = "http,https")
 public interface StackV2Endpoint extends StackEndpoint {
 
-
     @POST
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
