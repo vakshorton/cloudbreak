@@ -42,11 +42,12 @@ import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.BlueprintUtil;
+import com.sequenceiq.cloudbreak.cluster.ambari.validator.BlueprintValidator;
+import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.StackServiceComponentDescriptor;
+import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -74,7 +75,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     private static final int MILLIS_PER_SECOND = 1000;
 
     @Inject
-    private BlueprintValidator blueprintValidator;
+    private BlueprintUtil blueprintUtil;
 
     @Inject
     private StackServiceComponentDescriptors stackServiceComponentDescs;
@@ -312,11 +313,11 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         Map<String, String> result = new HashMap<>();
         List<Port> ports = NetworkUtils.getPorts(Optional.empty());
         try {
-            JsonNode hostGroupsNode = blueprintValidator.getHostGroupNode(blueprint);
-            Map<String, HostGroup> hostGroupMap = blueprintValidator.createHostGroupMap(hostGroups);
+            JsonNode hostGroupsNode = blueprintUtil.getHostGroupNode(blueprint);
+            Map<String, HostGroup> hostGroupMap = blueprintUtil.createHostGroupMap(hostGroups);
             for (JsonNode hostGroupNode : hostGroupsNode) {
-                String hostGroupName = blueprintValidator.getHostGroupName(hostGroupNode);
-                JsonNode componentsNode = blueprintValidator.getComponentsNode(hostGroupNode);
+                String hostGroupName = blueprintUtil.getHostGroupName(hostGroupNode);
+                JsonNode componentsNode = blueprintUtil.getComponentsNode(hostGroupNode);
                 HostGroup actualHostgroup = hostGroupMap.get(hostGroupName);
                 String serviceAddress;
                 if (actualHostgroup.getConstraint().getInstanceGroup() != null) {

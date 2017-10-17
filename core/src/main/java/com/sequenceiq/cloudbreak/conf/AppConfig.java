@@ -47,9 +47,10 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.cluster.ClusterValidator;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
+import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.StackServiceComponentDescriptor;
+import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteria;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ExecutorBasedParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
@@ -114,6 +115,9 @@ public class AppConfig implements ResourceLoaderAware {
 
     @Inject
     private List<FileSystemConfigurator> fileSystemConfigurators;
+
+    @Inject
+    private List<ClusterValidator> clusterValidators;
 
     @Inject
     private ConfigurableEnvironment environment;
@@ -203,6 +207,15 @@ public class AppConfig implements ResourceLoaderAware {
         Map<FileSystemType, FileSystemConfigurator> map = new HashMap<>();
         for (FileSystemConfigurator fileSystemConfigurator : fileSystemConfigurators) {
             map.put(fileSystemConfigurator.getFileSystemType(), fileSystemConfigurator);
+        }
+        return map;
+    }
+
+    @Bean
+    public Map<Class, ClusterValidator> clusterValidators() {
+        Map<Class, ClusterValidator> map = new HashMap<>();
+        for (ClusterValidator clusterValidator : clusterValidators) {
+            map.put(clusterValidator.getRelatedClass(), clusterValidator);
         }
         return map;
     }

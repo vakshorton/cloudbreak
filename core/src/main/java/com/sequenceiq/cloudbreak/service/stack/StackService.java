@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
+import com.sequenceiq.cloudbreak.cluster.ambari.domain.UpscaleValidatorRequest;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -44,7 +45,7 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.controller.validation.stack.StackRelatedBlueprintValidator;
+import com.sequenceiq.cloudbreak.controller.validation.ClusterValidatorFactory;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
@@ -150,7 +151,7 @@ public class StackService {
     private OpenSshPublicKeyValidator rsaPublicKeyValidator;
 
     @Inject
-    private StackRelatedBlueprintValidator stackRelatedBlueprintValidator;
+    private ClusterValidatorFactory clusterValidatorFactory;
 
     @Value("${cb.nginx.port:9443}")
     private Integer nginxPort;
@@ -565,7 +566,7 @@ public class StackService {
         }
     }
 
-    private void validateHostGroupAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack, Integer adjustment) {
+    public void validateHostGroupAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack, Integer adjustment) {
         Blueprint blueprint = stack.getCluster().getBlueprint();
         Optional<HostGroup> hostGroup = stack.getCluster().getHostGroups().stream()
             .filter(input -> input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup())).findFirst();
@@ -573,7 +574,7 @@ public class StackService {
             throw new BadRequestException(String.format("Instancegroup '%s' not found or not part of stack '%s'",
                 instanceGroupAdjustmentJson.getInstanceGroup(), stack.getName()));
         }
-        stackRelatedBlueprintValidator.validateHostGroupScalingRequest(blueprint, hostGroup, adjustment);
+        clusterValidatorFactory.validate(new UpscaleValidatorRequest(blueprint, hostGroup, adjustment));
     }
 
     private void validateStackStatus(Stack stack) {

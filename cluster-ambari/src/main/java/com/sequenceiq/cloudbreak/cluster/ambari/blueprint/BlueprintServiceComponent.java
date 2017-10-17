@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.controller.validation.blueprint;
+package com.sequenceiq.cloudbreak.cluster.ambari.blueprint;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ public class BlueprintServiceComponent {
 
     private final List<String> hostgroups;
 
-    BlueprintServiceComponent(String name, String hostgroup, int nodeCount) {
+    public BlueprintServiceComponent(String name, String hostgroup, int nodeCount) {
         this.name = name;
         this.nodeCount = nodeCount;
         hostgroups = Lists.newArrayList(hostgroup);

@@ -33,9 +33,9 @@ import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
+import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.BlueprintUtil;
+import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.StackServiceComponentDescriptor;
+import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
@@ -57,7 +57,7 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
     private ClusterToJsonConverter underTest;
 
     @Mock
-    private BlueprintValidator blueprintValidator;
+    private BlueprintUtil blueprintValidator;
 
     @Mock
     private StackServiceComponentDescriptors stackServiceComponentDescs;

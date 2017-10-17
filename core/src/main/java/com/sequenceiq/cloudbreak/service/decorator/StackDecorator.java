@@ -83,10 +83,10 @@ public class StackDecorator implements Decorator<Stack> {
 
     @Override
     public Stack decorate(Stack subject, Object... data) {
-        prepareDomainIfDefined(subject, data);
+        IdentityUser user = (IdentityUser) data[DecorationData.USER.ordinal()];
+        prepareDomainIfDefined(subject, user);
         Object credentialId = data[DecorationData.CREDENTIAL_ID.ordinal()];
         String credentialName = (String) data[DecorationData.CREDENTIAL_NAME.ordinal()];
-        IdentityUser user = (IdentityUser) data[DecorationData.USER.ordinal()];
         if (credentialId != null || subject.getCredential() != null || credentialName != null) {
             Object networkId = data[DecorationData.NETWORK_ID.ordinal()];
 
@@ -101,7 +101,7 @@ public class StackDecorator implements Decorator<Stack> {
             if (subject.getFailurePolicy() != null) {
                 validatFailurePolicy(subject, subject.getFailurePolicy());
             }
-            prepareInstanceGroups(subject, data);
+            prepareInstanceGroups(subject, user);
             prepareFlexSubscription(subject, data);
             validate(subject);
         }
@@ -129,8 +129,7 @@ public class StackDecorator implements Decorator<Stack> {
         }
     }
 
-    private void prepareInstanceGroups(Stack subject, Object... data) {
-        IdentityUser user = (IdentityUser) data[DecorationData.USER.ordinal()];
+    private void prepareInstanceGroups(Stack subject, IdentityUser user) {
         for (InstanceGroup instanceGroup : subject.getInstanceGroups()) {
             if (instanceGroup.getTemplate() != null) {
                 Template template = instanceGroup.getTemplate();
@@ -151,8 +150,7 @@ public class StackDecorator implements Decorator<Stack> {
         }
     }
 
-    private void prepareDomainIfDefined(Stack subject, Object... data) {
-        IdentityUser user = (IdentityUser) data[DecorationData.USER.ordinal()];
+    private void prepareDomainIfDefined(Stack subject, IdentityUser user) {
         if (subject.getNetwork() != null) {
             Network network = subject.getNetwork();
             network.setPublicInAccount(subject.isPublicInAccount());

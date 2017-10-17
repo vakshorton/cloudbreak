@@ -24,10 +24,10 @@ import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.controller.validation.ClusterValidatorFactory;
 import com.sequenceiq.cloudbreak.controller.validation.StackSensitiveDataPropagator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackParameterValidator;
-import com.sequenceiq.cloudbreak.controller.validation.stack.StackRelatedBlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackRelatedNetworkValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -79,7 +79,7 @@ public class StackV1Controller extends NotificationController implements StackV1
     private StackCommonController stackCommonController;
 
     @Autowired
-    private StackRelatedBlueprintValidator stackRelatedBlueprintValidator;
+    private ClusterValidatorFactory clusterValidatorFactory;
 
     @Autowired
     private StackRelatedNetworkValidator stackRelatedNetworkValidator;
@@ -116,11 +116,7 @@ public class StackV1Controller extends NotificationController implements StackV1
         if (stackRequest.getClusterRequest() != null) {
             StackValidationRequest stackValidationRequest = conversionService.convert(stackRequest, StackValidationRequest.class);
             StackValidation stackValidation = conversionService.convert(stackValidationRequest, StackValidation.class);
-            stackRelatedBlueprintValidator.validate(
-                    stackValidation.getBlueprint(),
-                    stackValidation.getHostGroups(),
-                    stackValidation.getInstanceGroups(),
-                    stackRequest.getClusterRequest().getValidateBlueprint());
+            clusterValidatorFactory.validate(stack);
             stackRelatedNetworkValidator.validate(stackValidation.getNetwork(), stackValidation.getInstanceGroups());
             CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stackValidation.getCredential());
             fileSystemValidator.validateFileSystem(stackValidationRequest.getPlatform(), cloudCredential, stackValidationRequest.getFileSystem());

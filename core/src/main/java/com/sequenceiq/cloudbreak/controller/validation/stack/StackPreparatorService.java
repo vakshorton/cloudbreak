@@ -10,9 +10,12 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.cluster.ambari.validator.StackRelatedBlueprintValidator;
+import com.sequenceiq.cloudbreak.cluster.ambari.validator.StackValidationValidator;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.ClusterCreationSetupService;
+import com.sequenceiq.cloudbreak.controller.validation.ClusterValidatorFactory;
 import com.sequenceiq.cloudbreak.controller.validation.StackSensitiveDataPropagator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
@@ -60,12 +63,16 @@ public class StackPreparatorService {
     private StackRelatedNetworkValidator stackRelatedNetworkValidator;
 
     @Autowired
+    private ClusterValidatorFactory clusterValidatorFactory;
+
+    @Autowired
     private StackRelatedBlueprintValidator stackRelatedBlueprintValidator;
 
+    @Autowired
+    private StackValidationValidator stackValidationValidator;
+
     public StackResponse createStack(IdentityUser user, StackV2Request stackV2Request, boolean publicInAccount) throws Exception {
-        stackV2Request.setAccount(user.getAccount());
-        stackV2Request.setOwner(user.getUserId());
-        stackV2Request.getClusterRequest().setName(stackV2Request.getName());
+        updateRequestWithMissingObjects(user, stackV2Request);
 
         stackParameterValidator.validate(
                 user,
@@ -97,18 +104,10 @@ public class StackPreparatorService {
             StackValidationRequest stackValidationRequest = prepareStackValidationRequest(stackV2Request);
             StackValidation stackValidation = prepareStackValidation(stackValidationRequest);
 
-            stackRelatedBlueprintValidator.validate(
-                    stackValidation.getBlueprint(),
-                    stackValidation.getHostGroups(),
-                    stackValidation.getInstanceGroups(),
-                    stackV2Request.getClusterRequest().getAmbariRequest().getValidateBlueprint());
-            stackRelatedNetworkValidator.validate(
-                    stackValidation.getNetwork(),
-                    stackValidation.getInstanceGroups());
+            clusterValidatorFactory.validate(stackValidation);
+            stackRelatedNetworkValidator.validate(stack.getNetwork(), stack.getInstanceGroups());
 
-
-            fileSystemValidator.validateFileSystem(
-                    stackValidationRequest.getPlatform(),
+            fileSystemValidator.validateFileSystem(stackValidationRequest.getPlatform(),
                     credentialToCloudCredentialConverter.convert(stackValidation.getCredential()),
                     stackValidationRequest.getFileSystem());
             clusterCreationService.validate(stackV2Request.getClusterRequest(), stack, user);
@@ -126,6 +125,12 @@ public class StackPreparatorService {
             stack.setCluster(cluster);
         }
         return conversionService.convert(stack, StackResponse.class);
+    }
+
+    private void updateRequestWithMissingObjects(IdentityUser user, StackV2Request stackV2Request) {
+        stackV2Request.setAccount(user.getAccount());
+        stackV2Request.setOwner(user.getUserId());
+        stackV2Request.getClusterRequest().setName(stackV2Request.getName());
     }
 
     private StackValidationRequest prepareStackValidationRequest(StackV2Request stackV2Request) {

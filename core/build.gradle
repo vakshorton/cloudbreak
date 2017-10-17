@@ -90,6 +90,7 @@ dependencies {
     compile project(':cloud-reactor-api')
     compile project(':cloud-reactor')
     compile project(':structuredevent-model')
+    compile project(':cluster-ambari')
 
     runtime project(':orchestrator-marathon')
     runtime project(':orchestrator-salt')
@@ -101,7 +102,6 @@ dependencies {
     runtime project(':cloud-byos')
     runtime project(':cloud-mock')
     runtime project(':cloud-azure')
-
 
     runtime     group: 'activation',                name: 'activation',                     version: '1.0.2'
 

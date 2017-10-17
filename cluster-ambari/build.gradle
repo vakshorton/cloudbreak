@@ -1,0 +1,22 @@
+apply plugin: 'java'
+apply plugin: 'info.solidsoft.pitest'
+
+sourceCompatibility = 1.8
+
+repositories {
+    maven { url 'http://repo.spring.io/libs-release' }
+    mavenCentral()
+}
+
+jar {
+    baseName = 'cluster-ambari'
+}
+
+dependencies {
+
+    compile project(':core-api')
+    compile project(':core-model')
+    compile project(':cloud-reactor')
+
+
+}

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.controller.validation.blueprint;
+package com.sequenceiq.cloudbreak.cluster.ambari.blueprint;
 
 public class StackServiceComponentDescriptor {
 

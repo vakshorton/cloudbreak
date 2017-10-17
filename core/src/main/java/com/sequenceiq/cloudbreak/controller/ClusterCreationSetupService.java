@@ -36,15 +36,16 @@ import com.sequenceiq.cloudbreak.cloud.model.DefaultHDPEntries;
 import com.sequenceiq.cloudbreak.cloud.model.DefaultHDPInfo;
 import com.sequenceiq.cloudbreak.cloud.model.HDPInfo;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
+import com.sequenceiq.cloudbreak.cluster.ambari.domain.KerberosValidationRequest;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.controller.validation.ClusterValidatorFactory;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.Component;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -91,32 +92,27 @@ public class ClusterCreationSetupService {
     @Autowired
     private BlueprintService blueprintService;
 
+    @Autowired
+    private ClusterValidatorFactory clusterValidatorFactory;
+
     public void validate(ClusterRequest request, Stack stack, IdentityUser user) {
-        if (request.getEnableSecurity() && request.getKerberos() == null) {
-            throw new BadRequestException("If the security is enabled the kerberos parameters cannot be empty");
-        }
+        clusterValidatorFactory.validate(new KerberosValidationRequest(request.getEnableSecurity(), request.getKerberos()));
         MDCBuilder.buildUserMdcContext(user);
         if (!stack.isAvailable() && BYOS.equals(stack.cloudPlatform())) {
             throw new BadRequestException("Stack is not in 'AVAILABLE' status, cannot create cluster now.");
         }
-        Credential credential = stack.getCredential();
-        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
+        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stack.getCredential());
 
         fileSystemValidator.validateFileSystem(stack.cloudPlatform(), cloudCredential, request.getFileSystem());
     }
 
     public void validate(ClusterV2Request request, Stack stack, IdentityUser user) {
-        if (request.getAmbariRequest().getEnableSecurity() && request.getAmbariRequest().getKerberos() == null) {
-            throw new BadRequestException("If the security is enabled the kerberos parameters cannot be empty");
-        }
+        clusterValidatorFactory.validate(new KerberosValidationRequest(request.getAmbariRequest().getEnableSecurity(), request.getAmbariRequest().getKerberos()));
         MDCBuilder.buildUserMdcContext(user);
         if (!stack.isAvailable() && BYOS.equals(stack.cloudPlatform())) {
             throw new BadRequestException("Stack is not in 'AVAILABLE' status, cannot create cluster now.");
         }
-        Credential credential = stack.getCredential();
-        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
 
-        fileSystemValidator.validateFileSystem(stack.cloudPlatform(), cloudCredential, request.getFileSystem());
     }
 
     public Cluster prepare(ClusterRequest request, Stack stack, IdentityUser user) throws Exception {

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.controller.validation.blueprint;
+package com.sequenceiq.cloudbreak.cluster.ambari.blueprint;
 
 import static org.hamcrest.Matchers.is;
 
@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.cluster.ambari.validator.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Constraint;
