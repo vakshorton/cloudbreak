@@ -105,6 +105,38 @@ public class ClusterCreationSetupService {
         fileSystemValidator.validateFileSystem(stack.cloudPlatform(), cloudCredential, request.getFileSystem());
     }
 
+<<<<<<< HEAD
+=======
+    public void validate(ClusterV2Request request, Stack stack, IdentityUser user) {
+        if (request.getAmbariRequest().getEnableSecurity() && request.getAmbariRequest().getKerberos() == null) {
+            throw new BadRequestException("If the security is enabled the kerberos parameters cannot be empty");
+        }
+        MDCBuilder.buildUserMdcContext(user);
+        if (!stack.isAvailable() && BYOS.equals(stack.cloudPlatform())) {
+            throw new BadRequestException("Stack is not in 'AVAILABLE' status, cannot create cluster now.");
+        }
+        Credential credential = stack.getCredential();
+        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
+
+        fileSystemValidator.validateFileSystem(stack.cloudPlatform(), cloudCredential, request.getFileSystem());
+    }
+
+    public Cluster prepare(ClusterRequest request, Stack stack, IdentityUser user) throws Exception {
+        Cluster cluster = conversionService.convert(request, Cluster.class);
+        cluster = clusterDecorator.decorate(cluster, stack.getId(), user,
+                request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
+                request.getRdsConfigIds(), request.getLdapConfigId(),
+                request.getBlueprint(), request.getRdsConfigJsons(),
+                request.getLdapConfig(), request.getConnectedCluster(), request.getBlueprintName());
+        List<ClusterComponent> components = new ArrayList<>();
+        components = addAmbariRepoConfig(stack.getId(), components, request.getAmbariRepoDetailsJson(), cluster);
+        components = addHDPRepoConfig(stack.getId(), components, request.getAmbariStackDetails(), request.getBlueprint(),
+                request.getBlueprintId(), request.getBlueprintName(), cluster, user);
+        components = addAmbariDatabaseConfig(components, request.getAmbariDatabaseDetails(), cluster);
+        return clusterService.create(user, stack.getId(), cluster, components);
+    }
+
+>>>>>>> some refactor
     public Cluster prepare(ClusterV2Request request, List<InstanceGroupV2Request> instanceGroupV2Requests,Stack stack, IdentityUser user) throws Exception {
         Cluster cluster = conversionService.convert(request, Cluster.class);
         cluster = clusterDecorator.decorate(cluster, stack.getId(), user,

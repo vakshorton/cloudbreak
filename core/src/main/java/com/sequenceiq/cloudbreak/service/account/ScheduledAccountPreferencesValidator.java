@@ -29,7 +29,7 @@ public class ScheduledAccountPreferencesValidator {
     private StackService stackService;
 
     @Inject
-    private AccountPreferencesValidator preferencesValidator;
+    private AccountAndUserPermissionEvaluator preferencesValidator;
 
     @Inject
     private ReactorFlowManager flowManager;

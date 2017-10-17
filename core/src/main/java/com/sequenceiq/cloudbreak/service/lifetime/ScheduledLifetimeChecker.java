@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationFailed;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
+import com.sequenceiq.cloudbreak.service.account.AccountAndUserPermissionEvaluator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
@@ -27,7 +27,7 @@ public class ScheduledLifetimeChecker {
     private StackService stackService;
 
     @Inject
-    private AccountPreferencesValidator preferencesValidator;
+    private AccountAndUserPermissionEvaluator preferencesValidator;
 
     @Inject
     private ReactorFlowManager flowManager;

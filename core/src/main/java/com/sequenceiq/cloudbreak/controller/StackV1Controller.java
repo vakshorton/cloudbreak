@@ -26,14 +26,16 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.validation.StackSensitiveDataPropagator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
-import com.sequenceiq.cloudbreak.controller.validation.stack.StackValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.StackParameterValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.StackRelatedBlueprintValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.StackRelatedNetworkValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.account.AccountAndUserPermissionEvaluator;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationFailed;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -53,7 +55,7 @@ public class StackV1Controller extends NotificationController implements StackV1
     private Decorator<Stack> stackDecorator;
 
     @Autowired
-    private AccountPreferencesValidator accountPreferencesValidator;
+    private AccountAndUserPermissionEvaluator accountAndUserPermissionEvaluator;
 
     @Autowired
     private FileSystemValidator fileSystemValidator;
@@ -62,7 +64,7 @@ public class StackV1Controller extends NotificationController implements StackV1
     private AuthenticatedUserService authenticatedUserService;
 
     @Autowired
-    private StackValidator stackValidator;
+    private StackParameterValidator stackParameterValidator;
 
     @Autowired
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
@@ -75,6 +77,12 @@ public class StackV1Controller extends NotificationController implements StackV1
 
     @Autowired
     private StackCommonController stackCommonController;
+
+    @Autowired
+    private StackRelatedBlueprintValidator stackRelatedBlueprintValidator;
+
+    @Autowired
+    private StackRelatedNetworkValidator stackRelatedNetworkValidator;
 
     @Override
     public StackResponse postPrivate(StackRequest stackRequest) throws Exception {
@@ -91,8 +99,8 @@ public class StackV1Controller extends NotificationController implements StackV1
     private StackResponse createStack(IdentityUser user, StackRequest stackRequest, boolean publicInAccount) throws Exception {
         stackRequest.setAccount(user.getAccount());
         stackRequest.setOwner(user.getUserId());
-        stackValidator.validate(user, stackRequest.getName(), stackRequest.getCredentialSource(),
-                stackRequest.getCredentialId(), stackRequest.getCredential(), stackRequest.getParameters());
+        stackParameterValidator.validate(user, stackRequest.getName(), Optional.of(stackRequest.getCredentialSource()),
+                stackRequest.getCredentialId(), Optional.of(stackRequest.getCredential()), stackRequest.getParameters());
         Stack stack = conversionService.convert(stackRequest, Stack.class);
         MDCBuilder.buildMdcContext(stack);
         stack = stackSensitiveDataPropagator.propagate(stackRequest.getCredentialSource(), stack, user);
@@ -102,13 +110,18 @@ public class StackV1Controller extends NotificationController implements StackV1
         validateAccountPreferences(stack, user);
 
         if (stack.getOrchestrator() != null && stack.getOrchestrator().getApiEndpoint() != null) {
-            stackService.validateOrchestrator(stack.getOrchestrator());
+            stackService.validateContainerOrchestrator(stack.getOrchestrator());
         }
 
         if (stackRequest.getClusterRequest() != null) {
             StackValidationRequest stackValidationRequest = conversionService.convert(stackRequest, StackValidationRequest.class);
             StackValidation stackValidation = conversionService.convert(stackValidationRequest, StackValidation.class);
-            stackService.validateStack(stackValidation, stackRequest.getClusterRequest().getValidateBlueprint());
+            stackRelatedBlueprintValidator.validate(
+                    stackValidation.getBlueprint(),
+                    stackValidation.getHostGroups(),
+                    stackValidation.getInstanceGroups(),
+                    stackRequest.getClusterRequest().getValidateBlueprint());
+            stackRelatedNetworkValidator.validate(stackValidation.getNetwork(), stackValidation.getInstanceGroups());
             CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stackValidation.getCredential());
             fileSystemValidator.validateFileSystem(stackValidationRequest.getPlatform(), cloudCredential, stackValidationRequest.getFileSystem());
             clusterCreationService.validate(stackRequest.getClusterRequest(), stack, user);
@@ -126,7 +139,7 @@ public class StackV1Controller extends NotificationController implements StackV1
 
     private void validateAccountPreferences(Stack stack, IdentityUser user) {
         try {
-            accountPreferencesValidator.validate(stack, user.getAccount(), user.getUserId());
+            accountAndUserPermissionEvaluator.validate(stack, user.getAccount(), user.getUserId());
         } catch (AccountPreferencesValidationFailed e) {
             throw new BadRequestException(e.getMessage(), e);
         }

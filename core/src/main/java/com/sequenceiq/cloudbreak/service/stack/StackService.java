@@ -44,8 +44,7 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
-import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.StackRelatedBlueprintValidator;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
@@ -60,7 +59,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -128,12 +126,6 @@ public class StackService {
     private ReactorFlowManager flowManager;
 
     @Inject
-    private BlueprintValidator blueprintValidator;
-
-    @Inject
-    private NetworkConfigurationValidator networkConfigurationValidator;
-
-    @Inject
     private CloudbreakEventService eventService;
 
     @Inject
@@ -156,6 +148,9 @@ public class StackService {
 
     @Inject
     private OpenSshPublicKeyValidator rsaPublicKeyValidator;
+
+    @Inject
+    private StackRelatedBlueprintValidator stackRelatedBlueprintValidator;
 
     @Value("${cb.nginx.port:9443}")
     private Integer nginxPort;
@@ -530,16 +525,7 @@ public class StackService {
         return instanceMetaDataRepository.save(metaData);
     }
 
-    public void validateStack(StackValidation stackValidation, boolean validateBlueprint) {
-        if (stackValidation.getNetwork() != null) {
-            networkConfigurationValidator.validateNetworkForStack(stackValidation.getNetwork(), stackValidation.getInstanceGroups());
-        }
-        if (validateBlueprint) {
-            blueprintValidator.validateBlueprintForStack(stackValidation.getBlueprint(), stackValidation.getHostGroups(), stackValidation.getInstanceGroups());
-        }
-    }
-
-    public void validateOrchestrator(Orchestrator orchestrator) {
+    public void validateContainerOrchestrator(Orchestrator orchestrator) {
         try {
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
             containerOrchestrator.validateApiEndpoint(new OrchestrationCredential(orchestrator.getApiEndpoint(), orchestrator.getAttributes().getMap()));
@@ -587,7 +573,7 @@ public class StackService {
             throw new BadRequestException(String.format("Instancegroup '%s' not found or not part of stack '%s'",
                 instanceGroupAdjustmentJson.getInstanceGroup(), stack.getName()));
         }
-        blueprintValidator.validateHostGroupScalingRequest(blueprint, hostGroup.get(), adjustment);
+        stackRelatedBlueprintValidator.validateHostGroupScalingRequest(blueprint, hostGroup, adjustment);
     }
 
     private void validateStackStatus(Stack stack) {

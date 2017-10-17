@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.controller.validation.stack;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -16,8 +17,8 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 
 @Component
-public class StackValidator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackValidator.class);
+public class StackParameterValidator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackParameterValidator.class);
 
     @Inject
     private List<ParameterValidator> parameterValidators;
@@ -25,9 +26,10 @@ public class StackValidator {
     @Inject
     private StackParameterService stackParameterService;
 
-    public void validate(IdentityUser user, String name, CredentialSourceRequest credentialSourceRequest,
-            Long credentialId, CredentialRequest credential, Map<String, String> parameters) {
-        List<StackParamValidation> stackParamValidations = stackParameterService.getStackParams(user, name, credentialSourceRequest, credentialId, credential);
+    public void validate(IdentityUser user, String name, Optional<CredentialSourceRequest> credentialSourceRequest,
+            Long credentialId, Optional<CredentialRequest> credential, Map<String, String> parameters) {
+        List<StackParamValidation> stackParamValidations = stackParameterService
+                .getStackParams(user, name, credentialSourceRequest.orElse(null), credentialId, credential.orElse(null));
         for (ParameterValidator parameterValidator : parameterValidators) {
             parameterValidator.validate(parameters, stackParamValidations);
         }

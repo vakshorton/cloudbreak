@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.controller;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.ws.rs.core.Response;
@@ -21,7 +20,6 @@ import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
-import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
@@ -30,15 +28,16 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.validation.StackSensitiveDataPropagator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
-import com.sequenceiq.cloudbreak.controller.validation.stack.StackValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.StackParameterValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.StackRelatedBlueprintValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.StackRelatedNetworkValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
-import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.account.AccountAndUserPermissionEvaluator;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationFailed;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -62,7 +61,7 @@ public class StackCommonController extends NotificationController implements Sta
     private Decorator<Stack> stackDecorator;
 
     @Autowired
-    private AccountPreferencesValidator accountPreferencesValidator;
+    private AccountAndUserPermissionEvaluator accountAndUserPermissionEvaluator;
 
     @Autowired
     private CloudParameterService parameterService;
@@ -74,7 +73,7 @@ public class StackCommonController extends NotificationController implements Sta
     private AuthenticatedUserService authenticatedUserService;
 
     @Autowired
-    private StackValidator stackValidator;
+    private StackParameterValidator stackParameterValidator;
 
     @Autowired
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
@@ -84,6 +83,12 @@ public class StackCommonController extends NotificationController implements Sta
 
     @Autowired
     private ClusterCreationSetupService clusterCreationService;
+
+    @Autowired
+    private StackRelatedBlueprintValidator stackRelatedBlueprintValidator;
+
+    @Autowired
+    private StackRelatedNetworkValidator stackRelatedNetworkValidator;
 
     @Override
     public Set<StackResponse> getPrivates() {
@@ -184,7 +189,8 @@ public class StackCommonController extends NotificationController implements Sta
     @Override
     public Response validate(StackValidationRequest request) {
         StackValidation stackValidation = conversionService.convert(request, StackValidation.class);
-        stackService.validateStack(stackValidation, true);
+        stackRelatedBlueprintValidator.validate(stackValidation.getBlueprint(), stackValidation.getHostGroups(), stackValidation.getInstanceGroups(), true);
+        stackRelatedNetworkValidator.validate(stackValidation.getNetwork(), stackValidation.getInstanceGroups());
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stackValidation.getCredential());
         fileSystemValidator.validateFileSystem(request.getPlatform(), cloudCredential, request.getFileSystem());
         return Response.status(Status.ACCEPTED).build();
@@ -203,53 +209,9 @@ public class StackCommonController extends NotificationController implements Sta
         return conversionService.convert(pv, PlatformVariantsJson.class);
     }
 
-    private StackResponse createStack(IdentityUser user, StackRequest stackRequest, boolean publicInAccount) throws Exception {
-        stackRequest.setAccount(user.getAccount());
-        stackRequest.setOwner(user.getUserId());
-        stackValidator.validate(user, stackRequest.getName(), stackRequest.getCredentialSource(), stackRequest.getCredentialId(),
-                stackRequest.getCredential(), stackRequest.getParameters());
-        Stack stack = conversionService.convert(stackRequest, Stack.class);
-        MDCBuilder.buildMdcContext(stack);
-        stack = stackSensitiveDataPropagator.propagate(stackRequest.getCredentialSource(), stack, user);
-        stack = stackDecorator.decorate(stack, stackRequest.getCredentialId(), stackRequest.getNetworkId(), user,
-                stackRequest.getFlexId(), stackRequest.getCredentialName());
-        stack.setPublicInAccount(publicInAccount);
-        validateAccountPreferences(stack, user);
-
-        if (stack.getOrchestrator() != null && stack.getOrchestrator().getApiEndpoint() != null) {
-            stackService.validateOrchestrator(stack.getOrchestrator());
-        }
-
-        if (stackRequest.getClusterRequest() != null) {
-            StackValidationRequest stackValidationRequest = conversionService.convert(stackRequest, StackValidationRequest.class);
-            StackValidation stackValidation = conversionService.convert(stackValidationRequest, StackValidation.class);
-            stackService.validateStack(stackValidation, stackRequest.getClusterRequest().getValidateBlueprint());
-            CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stackValidation.getCredential());
-            fileSystemValidator.validateFileSystem(stackValidationRequest.getPlatform(), cloudCredential, stackValidationRequest.getFileSystem());
-            clusterCreationService.validate(stackRequest.getClusterRequest(), stack, user);
-        }
-
-        stack = stackService.create(user, stack, stackRequest.getAmbariVersion(), stackRequest.getHdpVersion(),
-                stackRequest.getImageCatalog(), Optional.ofNullable(stackRequest.getCustomImage()));
-
-        if (stackRequest.getClusterRequest() != null) {
-            Cluster cluster = clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, user);
-            stack.setCluster(cluster);
-        }
-        return conversionService.convert(stack, StackResponse.class);
-    }
-
-    private void validateAccountPreferences(Stack stack, IdentityUser user) {
-        try {
-            accountPreferencesValidator.validate(stack, user.getAccount(), user.getUserId());
-        } catch (AccountPreferencesValidationFailed e) {
-            throw new BadRequestException(e.getMessage(), e);
-        }
-    }
-
     private void validateAccountPreferences(Long stackId, Integer scalingAdjustment) {
         try {
-            accountPreferencesValidator.validate(stackId, scalingAdjustment);
+            accountAndUserPermissionEvaluator.validate(stackId, scalingAdjustment);
         } catch (AccountPreferencesValidationFailed e) {
             throw new BadRequestException(e.getMessage(), e);
         }

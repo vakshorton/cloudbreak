@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 
 @Component
-public class AccountPreferencesValidator {
+public class AccountAndUserPermissionEvaluator {
     private static final Long EXTREMAL_VALUE = 0L;
 
     @Inject

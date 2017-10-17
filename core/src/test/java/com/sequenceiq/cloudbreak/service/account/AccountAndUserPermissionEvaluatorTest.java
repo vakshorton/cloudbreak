@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AccountPreferencesValidatorTest {
+public class AccountAndUserPermissionEvaluatorTest {
 
     private static final String EMPTY_STRING = "";
 
@@ -53,7 +53,7 @@ public class AccountPreferencesValidatorTest {
     private UserDetailsService userDetailsService;
 
     @InjectMocks
-    private AccountPreferencesValidator underTest;
+    private AccountAndUserPermissionEvaluator underTest;
 
     @Before
     public void setUp() {
