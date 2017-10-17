@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescrip
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("instanceGroups")
+@ApiModel("instanceGroupsV2")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InstanceGroupV2Request implements JsonEntity {
 

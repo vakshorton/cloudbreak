@@ -5,8 +5,10 @@ import com.sequenceiq.cloudbreak.api.model.CustomContainerRequest;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ByosV2Request implements JsonEntity {
 
