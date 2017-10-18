@@ -10,8 +10,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
-import com.sequenceiq.cloudbreak.cluster.ambari.validator.StackRelatedBlueprintValidator;
-import com.sequenceiq.cloudbreak.cluster.ambari.validator.StackValidationValidator;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.ClusterCreationSetupService;
@@ -64,12 +62,6 @@ public class StackPreparatorService {
 
     @Autowired
     private ClusterValidatorFactory clusterValidatorFactory;
-
-    @Autowired
-    private StackRelatedBlueprintValidator stackRelatedBlueprintValidator;
-
-    @Autowired
-    private StackValidationValidator stackValidationValidator;
 
     public StackResponse createStack(IdentityUser user, StackV2Request stackV2Request, boolean publicInAccount) throws Exception {
         updateRequestWithMissingObjects(user, stackV2Request);
