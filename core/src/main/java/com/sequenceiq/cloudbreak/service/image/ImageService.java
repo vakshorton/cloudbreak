@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Component;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.task.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 
 @Service

@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -47,7 +47,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariViewProvider;
+import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 

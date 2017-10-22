@@ -25,4 +25,6 @@ include 'autoscale-api'
 include 'structuredevent-model'
 
 rootProject.name = 'cloudbreak'
+include 'cluster-ambari'
+include 'cluster-api'
 

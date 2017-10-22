@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Gateway;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.cluster.ambari.AmbariComponentConfigProvider;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -44,7 +44,7 @@ public class ZeppelinConfigProvider {
     private BlueprintProcessor blueprintProcessor;
 
     @Inject
-    private ClusterComponentConfigProvider componentConfigProvider;
+    private AmbariComponentConfigProvider componentConfigProvider;
 
     public String addToBlueprint(Stack stack, String blueprintText) {
         if (blueprintProcessor.componentExistsInBlueprint(ZEPPELIN_MASTER, blueprintText)) {

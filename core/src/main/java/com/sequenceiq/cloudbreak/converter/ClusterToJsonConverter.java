@@ -47,7 +47,7 @@ import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ExposedServices;
@@ -56,10 +56,10 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.cluster.ambari.AmbariComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariViewProvider;
+import com.sequenceiq.cloudbreak.cluster.ambari.AmbariClientProvider;
+import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -98,7 +98,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     private JsonHelper jsonHelper;
 
     @Inject
-    private ClusterComponentConfigProvider componentConfigProvider;
+    private AmbariComponentConfigProvider componentConfigProvider;
 
     @Inject
     private StackUtil stackUtil;

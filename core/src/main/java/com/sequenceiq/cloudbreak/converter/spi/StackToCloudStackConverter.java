@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils;
+import com.sequenceiq.cloudbreak.cluster.ambari.VolumeUtils;
 
 @Component
 public class StackToCloudStackConverter {

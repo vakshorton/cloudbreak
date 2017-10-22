@@ -13,12 +13,12 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariConfigurationService;
+import com.sequenceiq.cloudbreak.cluster.ambari.AmbariClientProvider;
+import com.sequenceiq.cloudbreak.cluster.ambari.AmbariConfigurationService;
 
 @Service
 public class HostFilterService {

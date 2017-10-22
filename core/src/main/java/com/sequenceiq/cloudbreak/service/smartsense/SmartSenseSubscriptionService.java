@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.repository.SmartSenseSubscriptionRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.task.CloudbreakServiceException;
 
 @Service
 public class SmartSenseSubscriptionService {

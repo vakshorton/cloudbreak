@@ -4,9 +4,9 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.CloudbreakException;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service

@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.WasbFileSystemConfiguration;
+import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.AbstractFileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemScriptConfig;
 

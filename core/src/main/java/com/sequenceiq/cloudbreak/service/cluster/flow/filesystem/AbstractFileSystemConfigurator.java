@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
+import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.cluster.flow.RecipeScript;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 public abstract class AbstractFileSystemConfigurator<T extends FileSystemConfiguration> implements FileSystemConfigurator<T> {

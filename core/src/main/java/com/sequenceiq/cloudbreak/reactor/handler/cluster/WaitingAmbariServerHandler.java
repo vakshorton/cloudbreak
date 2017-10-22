@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.WaitForAmbariServerFa
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.WaitForAmbariServerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.WaitForAmbariServerSuccess;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;

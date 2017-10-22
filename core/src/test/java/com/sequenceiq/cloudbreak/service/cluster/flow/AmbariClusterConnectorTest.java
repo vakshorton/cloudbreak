@@ -32,11 +32,24 @@ import org.mockito.stubbing.Answer;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
+import com.sequenceiq.cloudbreak.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.cluster.ambari.AmbariAuthenticationProvider;
+import com.sequenceiq.cloudbreak.cluster.ambari.AmbariClientProvider;
+import com.sequenceiq.cloudbreak.cluster.ambari.AmbariComponentConfigProvider;
+import com.sequenceiq.cloudbreak.cluster.ambari.HadoopConfigurationService;
+import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.BlueprintTemplateProcessor;
+import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariHostsCheckerContext;
+import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariHostsStatusCheckerTask;
+import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariOperationFailedException;
+import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariOperationService;
+import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariOperationType;
+import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariStartupPollerObject;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -44,31 +57,23 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.PollingResult;
-import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariAuthenticationProvider;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
-import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.AutoRecoveryConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.DruidSupersetConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.LlapConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.ZeppelinConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template.BlueprintTemplateProcessor;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
+import com.sequenceiq.cloudbreak.task.StatusCheckerTask;
 
 import groovyx.net.http.HttpResponseException;
 import reactor.bus.EventBus;
@@ -116,7 +121,7 @@ public class AmbariClusterConnectorTest {
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
     @Mock
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+    private AmbariComponentConfigProvider ambariComponentConfigProvider;
 
     @Mock
     private AutoRecoveryConfigProvider autoRecoveryConfigProvider;
@@ -233,7 +238,7 @@ public class AmbariClusterConnectorTest {
         when(ambariOperationService.waitForOperations(any(Stack.class), any(AmbariClient.class), anyMap(), any(AmbariOperationType.class)))
                 .thenReturn(PollingResult.TIMEOUT);
         when(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).thenReturn(OrchestratorType.HOST);
-        when(clusterComponentConfigProvider.getHDPRepo(any())).thenAnswer((Answer<HDPRepo>) invocation -> {
+        when(ambariComponentConfigProvider.getHDPRepo(any())).thenAnswer((Answer<HDPRepo>) invocation -> {
             HDPRepo hdpRepo = new HDPRepo();
             hdpRepo.setStack(new HashMap<>(Collections.singletonMap(HDPRepo.REPO_ID_TAG, "stackRepoId")));
             hdpRepo.setUtil(new HashMap<>(Collections.singletonMap(HDPRepo.REPO_ID_TAG, "utilRepoId")));
@@ -247,7 +252,7 @@ public class AmbariClusterConnectorTest {
 
     @Test
     public void testChangeAmbariCredentialsWhenUserIsTheSameThenModifyUser() throws Exception {
-        underTest.credentialUpdateAmbariCluster(stack.getId(), "admin1");
+        underTest.credentialUpdateAmbariCluster(stack, stack.getCluster(), "admin1");
         verify(ambariClient, times(1)).changePassword(anyString(), anyString(), anyString(), anyBoolean());
     }
 

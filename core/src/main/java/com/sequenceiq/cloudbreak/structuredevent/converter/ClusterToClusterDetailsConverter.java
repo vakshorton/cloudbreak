@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.Gateway;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
-import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.cluster.ambari.AmbariComponentConfigProvider;
 
 @Component
 public class ClusterToClusterDetailsConverter extends AbstractConversionServiceAwareConverter<Cluster, ClusterDetails> {
@@ -24,7 +24,7 @@ public class ClusterToClusterDetailsConverter extends AbstractConversionServiceA
     private ConversionService conversionService;
 
     @Inject
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+    private AmbariComponentConfigProvider ambariComponentConfigProvider;
 
     @Override
     public ClusterDetails convert(Cluster source) {
@@ -79,16 +79,16 @@ public class ClusterToClusterDetailsConverter extends AbstractConversionServiceA
     }
 
     private void convertComponents(ClusterDetails clusterDetails, Cluster cluster) {
-        AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
+        AmbariRepo ambariRepo = ambariComponentConfigProvider.getAmbariRepo(cluster.getId());
         if (ambariRepo != null) {
             clusterDetails.setAmbariVersion(ambariRepo.getVersion());
         }
-        HDPRepo hdpRepo = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
+        HDPRepo hdpRepo = ambariComponentConfigProvider.getHDPRepo(cluster.getId());
         if (hdpRepo != null) {
             clusterDetails.setClusterType(hdpRepo.getStack().get(HDPRepo.REPO_ID_TAG));
             clusterDetails.setClusterVersion(hdpRepo.getHdpVersion());
         }
-        AmbariDatabase ambariDatabase = clusterComponentConfigProvider.getAmbariDatabase(cluster.getId());
+        AmbariDatabase ambariDatabase = ambariComponentConfigProvider.getAmbariDatabase(cluster.getId());
         if (ambariDatabase != null) {
             clusterDetails.setExternalDatabase(!ambariDatabase.getVendor().equals(DatabaseVendor.EMBEDDED.value()));
             clusterDetails.setDatabaseType(ambariDatabase.getVendor());

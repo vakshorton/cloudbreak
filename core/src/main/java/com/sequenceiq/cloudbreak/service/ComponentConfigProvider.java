@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Component;
 import com.sequenceiq.cloudbreak.repository.ComponentRepository;
+import com.sequenceiq.cloudbreak.task.CloudbreakServiceException;
 
 @Service
 public class ComponentConfigProvider {

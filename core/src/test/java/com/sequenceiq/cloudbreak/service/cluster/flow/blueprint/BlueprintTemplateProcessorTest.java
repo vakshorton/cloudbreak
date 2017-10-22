@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.common.type.RdsType;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.cluster.ambari.AmbariComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template.BlueprintTemplateProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 public class BlueprintTemplateProcessorTest {
 
     @Mock
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+    private AmbariComponentConfigProvider ambariComponentConfigProvider;
 
     @InjectMocks
     private final BlueprintTemplateProcessor underTest = new BlueprintTemplateProcessor();
@@ -47,7 +47,7 @@ public class BlueprintTemplateProcessorTest {
         ambariDatabase.setPort(5432);
         ambariDatabase.setVendor("postgres");
 
-        when(clusterComponentConfigProvider.getAmbariDatabase(anyLong())).thenReturn(ambariDatabase);
+        when(ambariComponentConfigProvider.getAmbariDatabase(anyLong())).thenReturn(ambariDatabase);
     }
 
     @Test
