@@ -11,8 +11,8 @@ import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveCredentialCre
 import com.sequenceiq.cloudbreak.converter.spi.ExtendedCloudCredentialToCredentialConverter;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
-import com.sequenceiq.cloudbreak.service.notification.Notification;
-import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
+import com.sequenceiq.cloudbreak.notification.Notification;
+import com.sequenceiq.cloudbreak.notification.NotificationSender;
 
 import reactor.bus.Event;
 

@@ -17,6 +17,7 @@ import org.junit.rules.ExpectedException;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.provider.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 

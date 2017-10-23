@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -31,6 +32,7 @@ import com.sequenceiq.cloudbreak.cluster.ambari.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.cluster.ambari.AmbariConfigurationService;
 import com.sequenceiq.cloudbreak.cluster.ambari.ConfigParam;
 import com.sequenceiq.cloudbreak.cluster.ambari.DataNodeUtils;
+import com.sequenceiq.cloudbreak.cluster.ambari.filter.HostFilterService;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -49,9 +51,8 @@ import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.repository.ContainerRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.tls.TlsSecurityService;
 import com.sequenceiq.cloudbreak.task.CloudbreakServiceException;
 
 import groovyx.net.http.HttpResponseException;
@@ -108,9 +109,6 @@ public class AmbariDecommissioner {
     private HostFilterService hostFilterService;
 
     @Inject
-    private ContainerOrchestratorResolver containerOrchestratorResolver;
-
-    @Inject
     private ContainerRepository containerRepository;
 
     @Inject
@@ -118,12 +116,6 @@ public class AmbariDecommissioner {
 
     @Inject
     private GatewayConfigService gatewayConfigService;
-
-    @Inject
-    private OrchestratorTypeResolver orchestratorTypeResolver;
-
-    @Inject
-    private HostOrchestratorResolver hostOrchestratorResolver;
 
     @PostConstruct
     public void init() {
@@ -141,7 +133,9 @@ public class AmbariDecommissioner {
         return hostsToRemove;
     }
 
-    public Set<String> decommissionAmbariNodes(Stack stack, String hostGroupName, Set<String> hostNames) throws CloudbreakException {
+    public Set<String> decommissionAmbariNodes(Stack stack, String hostGroupName, Set<String> hostNames,
+            Optional<HostOrchestrator> hostOrchestrator, Optional<ContainerOrchestrator> containerOrchestrator)
+            throws CloudbreakException {
         Map<String, HostMetadata> hostsToRemove = collectHostMetadata(stack.getCluster(), hostGroupName, hostNames);
         if (hostsToRemove.size() != hostNames.size()) {
             throw new CloudbreakException("Not all the hosts found in the given host group.");
@@ -171,7 +165,7 @@ public class AmbariDecommissioner {
         Map<String, Map<String, String>> runningComponents = ambariClient.getHostComponentsStates();
         if (!unhealthyHosts.isEmpty()) {
             List<String> hostList = new ArrayList<>(hostsToRemove.keySet());
-            removeHostsFromOrchestrator(stack, ambariClient, hostList);
+            removeHostsFromOrchestrator(stack, ambariClient, hostList, hostOrchestrator, containerOrchestrator);
             for (Entry<String, HostMetadata> host : unhealthyHosts.entrySet()) {
                 deleteHostFromAmbari(host.getValue(), runningComponents, ambariClient);
                 hostMetadataRepository.delete(host.getValue().getId());
@@ -179,7 +173,7 @@ public class AmbariDecommissioner {
             }
         }
         if (!healthyHosts.isEmpty()) {
-            deletedHosts.addAll(decommissionAmbariNodes(stack, healthyHosts, runningComponents, ambariClient));
+            deletedHosts.addAll(decommissionAmbariNodes(stack, healthyHosts, runningComponents, ambariClient, hostOrchestrator, containerOrchestrator));
         }
         return deletedHosts;
     }
@@ -207,7 +201,7 @@ public class AmbariDecommissioner {
     }
 
     private Set<String> decommissionAmbariNodes(Stack stack, Map<String, HostMetadata> hostsToRemove, Map<String, Map<String, String>> runningComponents,
-            AmbariClient ambariClient) throws CloudbreakException {
+            AmbariClient ambariClient, Optional<HostOrchestrator> hostOrchestrator, Optional<ContainerOrchestrator> containerOrchestrator) throws CloudbreakException {
         Set<String> result = new HashSet<>();
         PollingResult pollingResult = startServicesIfNeeded(stack, ambariClient, runningComponents);
         if (PollingResult.isSuccess(pollingResult)) {
@@ -223,7 +217,7 @@ public class AmbariDecommissioner {
                     if (PollingResult.isSuccess(pollingResult)) {
                         pollingResult = stopHadoopComponents(stack, ambariClient, hostList, runningComponents);
                         if (PollingResult.isSuccess(pollingResult)) {
-                            pollingResult = removeHostsFromOrchestrator(stack, ambariClient, hostList);
+                            pollingResult = removeHostsFromOrchestrator(stack, ambariClient, hostList, hostOrchestrator, containerOrchestrator);
                             if (PollingResult.isSuccess(pollingResult) || PollingResult.isTimeout(pollingResult)) {
                                 deleteHosts(hostList, runningComponents, ambariClient);
                                 result.addAll(hostsToRemove.keySet());
@@ -388,31 +382,30 @@ public class AmbariDecommissioner {
         return result;
     }
 
-    private PollingResult removeHostsFromOrchestrator(Stack stack, AmbariClient ambariClient, List<String> hostNames) throws CloudbreakException {
+    private PollingResult removeHostsFromOrchestrator(Stack stack, AmbariClient ambariClient, List<String> hostNames,
+            Optional<HostOrchestrator> hostOrchestrator, Optional<ContainerOrchestrator> containerOrchestrator)
+            throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         Map<String, Object> map = new HashMap<>();
         map.putAll(orchestrator.getAttributes().getMap());
-        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
         try {
-            if (orchestratorType.containerOrchestrator()) {
+            if (containerOrchestrator.isPresent()) {
                 OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
-                ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
                 Set<Container> containers = containerRepository.findContainersInCluster(stack.getCluster().getId());
                 List<ContainerInfo> containersToDelete = containers.stream()
                         .filter(input -> hostNames.contains(input.getHost()) && input.getImage().contains(DockerContainer.AMBARI_AGENT.getName()))
                         .map(input -> new ContainerInfo(input.getContainerId(), input.getName(), input.getHost(), input.getImage()))
                         .collect(Collectors.toList());
-                containerOrchestrator.deleteContainer(containersToDelete, credential);
+                containerOrchestrator.get().deleteContainer(containersToDelete, credential);
                 containerRepository.delete(containers);
                 return waitForHostsToLeave(stack, ambariClient, hostNames);
-            } else if (orchestratorType.hostOrchestrator()) {
-                HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
+            } else if (hostOrchestrator.isPresent()) {
                 Map<String, String> privateIpsByFQDN = new HashMap<>();
                 stack.getInstanceMetaDataAsList().stream()
                         .filter(instanceMetaData -> hostNames.stream().anyMatch(hn -> hn.contains(instanceMetaData.getDiscoveryFQDN().split("\\.")[0])))
                         .forEach(instanceMetaData -> privateIpsByFQDN.put(instanceMetaData.getDiscoveryFQDN(), instanceMetaData.getPrivateIp()));
                 List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-                hostOrchestrator.tearDown(allGatewayConfigs, privateIpsByFQDN);
+                hostOrchestrator.get().tearDown(allGatewayConfigs, privateIpsByFQDN);
             }
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.error("Failed to delete orchestrator components while decommissioning: ", e);

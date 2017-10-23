@@ -40,7 +40,8 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
         DecommissionResult result;
         try {
             Stack stack = stackService.getByIdWithLists(request.getStackId());
-            Set<String> hostNames = ambariDecommissioner.decommissionAmbariNodes(stack, request.getHostGroupName(), request.getHostNames());
+            Set<String> hostNames = ambariDecommissioner.decommissionAmbariNodes(stack, request.getHostGroupName(), request.getHostNames(),
+                    request.getHostOrchestrator(), request.getContainerOrchestrator());
             result = new DecommissionResult(request, hostNames);
         } catch (Exception e) {
             result = new DecommissionResult(e.getMessage(), e, request);

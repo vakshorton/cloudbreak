@@ -54,7 +54,7 @@ public class BlueprintTemplateProcessor {
         }
 
         return new BlueprintTemplateModelContextBuilder()
-                .withAmbariDatabase(clusterComponentConfigProvider.getAmbariDatabase(cluster.getComponents()))
+                .withAmbariDatabase(clusterComponentConfigProvider.getAmbariDatabase(cluster.getId()))
                 .withClusterName(cluster.getName())
                 .withLdap(cluster.getLdapConfig())
                 .withRdsConfigs(rdsConfigs)

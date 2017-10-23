@@ -16,6 +16,8 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.cluster.ClusterBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.notification.Notification;
+import com.sequenceiq.cloudbreak.notification.NotificationSender;
 
 @Component
 public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusCheckerTask<AmbariOperations> {

@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPollingRe
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPollingResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartResult;
-import com.sequenceiq.cloudbreak.cluster.ambari.ClusterService;
+import com.sequenceiq.cloudbreak.cluster.ClusterService;
 
 @Configuration
 public class ClusterStartActions {

@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.cluster.model.BlueprintConfigurationEntry;
+
 public interface BlueprintProcessor {
 
     String addConfigEntries(String originalBlueprint, List<BlueprintConfigurationEntry> properties, boolean override);

@@ -12,9 +12,8 @@ jar {
 dependencies {
     compile group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
 
-    compile project(':orchestrator-api')
     compile project(':core-api')
-    compile project(':core-model')
+    compile project(':core-repository')
 
     testCompile (group: 'junit', name: 'junit', version: '4+') {
         exclude group: 'org.hamcrest'

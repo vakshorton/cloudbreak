@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -50,7 +51,8 @@ import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariOperationFailedExcept
 import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariOperationService;
 import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariOperationType;
 import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariStartupPollerObject;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
+import com.sequenceiq.cloudbreak.cluster.recipe.RecipeEngine;
+import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -65,14 +67,14 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.AutoRecoveryConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.DruidSupersetConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.LlapConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.ZeppelinConfigProvider;
+import com.sequenceiq.cloudbreak.service.tls.TlsSecurityService;
+import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.provider.AutoRecoveryConfigProvider;
+import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.provider.DruidSupersetConfigProvider;
+import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.provider.LlapConfigProvider;
+import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.provider.SmartSenseConfigProvider;
+import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.provider.ZeppelinConfigProvider;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.task.StatusCheckerTask;
 
 import groovyx.net.http.HttpResponseException;
@@ -230,7 +232,7 @@ public class AmbariClusterConnectorTest {
         doThrow(new IllegalArgumentException("Illegal Argument")).when(hostGroupService).getByCluster(anyLong());
         thrown.expect(AmbariOperationFailedException.class);
         thrown.expectMessage("Illegal Argument");
-        underTest.buildAmbariCluster(stack);
+        underTest.buildAmbariCluster(stack, Optional.empty());
     }
 
     @Test
@@ -247,7 +249,7 @@ public class AmbariClusterConnectorTest {
         when(cloudbreakMessagesService.getMessage(eq("ambari.cluster.install.failed"))).thenReturn("ambari.cluster.install.failed");
         thrown.expect(AmbariOperationFailedException.class);
         thrown.expectMessage("ambari.cluster.install.failed");
-        underTest.buildAmbariCluster(stack);
+        underTest.buildAmbariCluster(stack, Optional.empty());
     }
 
     @Test

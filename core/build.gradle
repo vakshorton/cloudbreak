@@ -80,7 +80,7 @@ dependencies {
     compile group: 'com.cedarsoftware',             name: 'json-io',                        version: '4.9.12'
     compile group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
 
-    compile project(':core-model')
+    compile project(':core-repository')
     compile project(':orchestrator-api')
     compile project(':cloud-reactor-api')
     compile project(':cloud-reactor')
