@@ -1,7 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cluster.flow;
-
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
-import static com.sequenceiq.cloudbreak.cluster.recipe.RecipeEngine.DEFAULT_RECIPES;
+package com.sequenceiq.cloudbreak.cluster.recipe;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,14 +15,16 @@ import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.util.Joiner;
-import com.sequenceiq.cloudbreak.api.model.Status;
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
+import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.cluster.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -33,13 +32,10 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 
 @Component
 public class OrchestratorRecipeExecutor {
-
-    @Inject
-    private HostOrchestratorResolver hostOrchestratorResolver;
+    public static final Set<String> DEFAULT_RECIPES =  Collections.unmodifiableSet(Sets.newHashSet("hdfs-home", "smartsense-capture-schedule"));
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -50,36 +46,33 @@ public class OrchestratorRecipeExecutor {
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
-    public void uploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
-        HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
+    public void uploadRecipes(Stack stack, Set<HostGroup> hostGroups, HostOrchestrator hostOrchestrator) throws CloudbreakException {
         Map<String, List<RecipeModel>> recipeMap = hostGroups.stream().filter(hg -> !hg.getRecipes().isEmpty())
                 .collect(Collectors.toMap(HostGroup::getName, h -> convert(h.getRecipes())));
         List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         recipesEvent(stack.getId(), stack.getStatus(), recipeMap);
         try {
-            hostOrchestrator.uploadRecipes(allGatewayConfigs, recipeMap, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+            hostOrchestrator.uploadRecipes(allGatewayConfigs, recipeMap, ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorFailedException e) {
             throw new CloudbreakException(e);
         }
     }
 
-    public void preInstall(Stack stack) throws CloudbreakException {
-        HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
+    public void preInstall(Stack stack, HostOrchestrator hostOrchestrator) throws CloudbreakException {
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
             hostOrchestrator.preInstallRecipes(gatewayConfig, collectNodes(stack),
-                    clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+                    ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorFailedException e) {
             throw new CloudbreakException(e);
         }
     }
 
-    public void postInstall(Stack stack) throws CloudbreakException {
-        HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
+    public void postInstall(Stack stack, HostOrchestrator hostOrchestrator) throws CloudbreakException {
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
             hostOrchestrator.postInstallRecipes(gatewayConfig, collectNodes(stack),
-                    clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+                    ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorFailedException e) {
             throw new CloudbreakException(e);
         }

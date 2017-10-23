@@ -19,12 +19,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
+import com.sequenceiq.cloudbreak.cluster.ambari.AmbariComponentConfigProvider;
+import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.BlueprintTemplateProcessor;
 import com.sequenceiq.cloudbreak.common.type.RdsType;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.cluster.ambari.AmbariComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template.BlueprintTemplateProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)

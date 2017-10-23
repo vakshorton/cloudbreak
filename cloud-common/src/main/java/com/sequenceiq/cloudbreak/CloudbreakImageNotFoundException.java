@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core;
+package com.sequenceiq.cloudbreak;
 
 public class CloudbreakImageNotFoundException extends Exception {
 

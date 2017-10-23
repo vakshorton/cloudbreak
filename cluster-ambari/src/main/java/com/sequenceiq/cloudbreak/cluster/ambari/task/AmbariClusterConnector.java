@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -60,12 +61,13 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.cluster.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.cluster.ambari.AmbariAuthenticationProvider;
 import com.sequenceiq.cloudbreak.cluster.ambari.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.cluster.ambari.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.cluster.ambari.AmbariComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cluster.ambari.HadoopConfigurationService;
-import com.sequenceiq.cloudbreak.cluster.model.BlueprintConfigurationEntry;
+import com.sequenceiq.cloudbreak.cluster.ambari.RecipeEngine;
 import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.BlueprintProcessor;
 import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.BlueprintTemplateProcessor;
 import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.provider.AutoRecoveryConfigProvider;
@@ -76,7 +78,6 @@ import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.provider.LlapConfigPro
 import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.provider.RDSConfigProvider;
 import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.provider.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.provider.ZeppelinConfigProvider;
-import com.sequenceiq.cloudbreak.cluster.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.cluster.ambari.kerberos.KerberosContainerDnResolver;
 import com.sequenceiq.cloudbreak.cluster.ambari.kerberos.KerberosDomainResolver;
 import com.sequenceiq.cloudbreak.cluster.ambari.kerberos.KerberosHostResolver;
@@ -84,7 +85,7 @@ import com.sequenceiq.cloudbreak.cluster.ambari.kerberos.KerberosLdapResolver;
 import com.sequenceiq.cloudbreak.cluster.ambari.kerberos.KerberosPrincipalResolver;
 import com.sequenceiq.cloudbreak.cluster.ambari.kerberos.KerberosRealmResolver;
 import com.sequenceiq.cloudbreak.cluster.ambari.kerberos.KerberosTypeResolver;
-import com.sequenceiq.cloudbreak.cluster.recipe.RecipeEngine;
+import com.sequenceiq.cloudbreak.cluster.model.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
@@ -102,6 +103,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.domain.TopologyRecord;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
@@ -109,6 +111,7 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.tls.TlsSecurityService;
 import com.sequenceiq.cloudbreak.task.CloudbreakServiceException;
@@ -277,7 +280,7 @@ public class AmbariClusterConnector {
         }
     }
 
-    public void buildAmbariCluster(Stack stack, OrchestratorType orchestratorType) {
+    public void buildAmbariCluster(Stack stack, Optional<HostOrchestrator> hostOrchestrator, OrchestratorType orchestratorType) {
         Cluster cluster = stack.getCluster();
         try {
             if (cluster.getCreationStarted() == null) {
@@ -288,7 +291,7 @@ public class AmbariClusterConnector {
             Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
             Map<String, List<Map<String, String>>> hostGroupMappings = buildHostGroupAssociations(hostGroups);
 
-            recipeEngine.executePreInstall(stack, hostGroups, orchestratorType,
+            recipeEngine.executePreInstall(stack, hostGroups, hostOrchestrator,
                     smartSenseConfigProvider.smartSenseIsConfigurable(cluster.getBlueprint().getBlueprintText()));
             Set<RDSConfig> rdsConfigs = rdsConfigRepository.findByClusterId(stack.getOwner(), stack.getAccount(), cluster.getId());
 
@@ -330,7 +333,7 @@ public class AmbariClusterConnector {
             pollingResult = waitForClusterInstall(stack, ambariClient);
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
 
-            recipeEngine.executePostInstall(stack);
+            recipeEngine.executePostInstall(stack, hostOrchestrator);
 
             triggerSmartSenseCapture(ambariClient, blueprintText);
             cluster = ambariViewProvider.provideViewInformation(ambariClient, cluster);

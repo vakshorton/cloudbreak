@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
+import static com.sequenceiq.cloudbreak.cluster.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.EXIT;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.TIMEOUT;
 import static java.util.Collections.singletonMap;

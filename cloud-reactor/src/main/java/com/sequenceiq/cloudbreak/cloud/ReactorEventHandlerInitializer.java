@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.reactor.init;
+package com.sequenceiq.cloudbreak.cloud;
 
 import static reactor.bus.selector.Selectors.$;
 
@@ -13,8 +13,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 
 import reactor.bus.EventBus;
 

@@ -4,14 +4,14 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.ReactorEventHandler;
+import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterCredentialChangeRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterCredentialChangeResult;
-import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
@@ -45,10 +45,10 @@ public class ClusterCredentialChangeHandler implements ReactorEventHandler<Clust
             Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
             switch (request.getType()) {
                 case REPLACE:
-                    ambariClusterConnector.credentialReplaceAmbariCluster(stack, cluster, request.getUser(), request.getPassword());
+                    ambariClusterConnector.credentialReplaceAmbariCluster(stack.getId(), request.getUser(), request.getPassword());
                     break;
                 case UPDATE:
-                    ambariClusterConnector.credentialUpdateAmbariCluster(stack, cluster, request.getPassword());
+                    ambariClusterConnector.credentialUpdateAmbariCluster(stack.getId(), request.getPassword());
                     break;
                 default:
                     throw new UnsupportedOperationException("Ambari credential update request not supported: " + request.getType());

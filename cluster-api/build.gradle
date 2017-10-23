@@ -11,6 +11,7 @@ jar {
 
 dependencies {
     compile group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
+    compile group: 'com.google.http-client',        name: 'google-http-client-jackson2',    version: '1.22.0'
 
     compile project(':core-api')
     compile project(':core-repository')

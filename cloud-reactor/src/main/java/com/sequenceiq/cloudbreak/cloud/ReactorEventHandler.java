@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.reactor.handler;
+package com.sequenceiq.cloudbreak.cloud;
 
 import reactor.bus.Event;
 import reactor.fn.Consumer;

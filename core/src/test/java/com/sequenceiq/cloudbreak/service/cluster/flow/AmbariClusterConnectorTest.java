@@ -51,7 +51,7 @@ import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariOperationFailedExcept
 import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariOperationService;
 import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariOperationType;
 import com.sequenceiq.cloudbreak.cluster.ambari.task.AmbariStartupPollerObject;
-import com.sequenceiq.cloudbreak.cluster.recipe.RecipeEngine;
+import com.sequenceiq.cloudbreak.cluster.ambari.RecipeEngine;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -232,7 +232,7 @@ public class AmbariClusterConnectorTest {
         doThrow(new IllegalArgumentException("Illegal Argument")).when(hostGroupService).getByCluster(anyLong());
         thrown.expect(AmbariOperationFailedException.class);
         thrown.expectMessage("Illegal Argument");
-        underTest.buildAmbariCluster(stack, Optional.empty());
+        underTest.buildAmbariCluster(stack, Optional.empty(), OrchestratorType.HOST);
     }
 
     @Test
@@ -249,12 +249,12 @@ public class AmbariClusterConnectorTest {
         when(cloudbreakMessagesService.getMessage(eq("ambari.cluster.install.failed"))).thenReturn("ambari.cluster.install.failed");
         thrown.expect(AmbariOperationFailedException.class);
         thrown.expectMessage("ambari.cluster.install.failed");
-        underTest.buildAmbariCluster(stack, Optional.empty());
+        underTest.buildAmbariCluster(stack, Optional.empty(), OrchestratorType.HOST);
     }
 
     @Test
     public void testChangeAmbariCredentialsWhenUserIsTheSameThenModifyUser() throws Exception {
-        underTest.credentialUpdateAmbariCluster(stack, stack.getCluster(), "admin1");
+        underTest.credentialUpdateAmbariCluster(stack.getId(), "admin1");
         verify(ambariClient, times(1)).changePassword(anyString(), anyString(), anyString(), anyBoolean());
     }
 

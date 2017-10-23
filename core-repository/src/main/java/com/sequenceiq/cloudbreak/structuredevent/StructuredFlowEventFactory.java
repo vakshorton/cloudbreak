@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.structuredevent.event.BlueprintDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEve
 @Transactional
 public class StructuredFlowEventFactory {
     @Inject
-    private StackService stackService;
+    private StackRepository stackRepository;
 
     @Inject
     private ConversionService conversionService;
@@ -43,7 +43,7 @@ public class StructuredFlowEventFactory {
     }
 
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
-        Stack stack = stackService.getById(stackId);
+        Stack stack = stackRepository.findOne(stackId);
         OperationDetails operationDetails = new OperationDetails("FLOW", "STACK", stackId, stack.getAccount(), stack.getOwner(),
                 cloudbreakNodeConfig.getId(), cbVersion);
         StackDetails stackDetails = null;
@@ -64,7 +64,7 @@ public class StructuredFlowEventFactory {
     }
 
     public StructuredNotificationEvent createStructuredNotificationEvent(Long stackId, String notificationType, String message, String instanceGroupName) {
-        Stack stack = stackService.getById(stackId);
+        Stack stack = stackRepository.findOne(stackId);
         OperationDetails operationDetails = new OperationDetails("NOTIFICATION", "STACK", stackId, stack.getAccount(), stack.getOwner(),
                 cloudbreakNodeConfig.getInstanceUUID(), cbVersion);
         NotificationDetails notificationDetails = new NotificationDetails();

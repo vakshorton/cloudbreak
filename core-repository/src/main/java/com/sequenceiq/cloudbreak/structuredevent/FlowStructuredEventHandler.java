@@ -5,7 +5,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.messaging.Message;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.listener.StateMachineListenerAdapter;
 import org.springframework.statemachine.state.State;
@@ -64,7 +63,7 @@ public class FlowStructuredEventHandler<S, E> extends StateMachineListenerAdapte
     }
 
     @Override
-    public void eventNotAccepted(Message<E> event) {
+    public void eventNotAccepted(org.springframework.messaging.Message<E> event) {
 
     }
 

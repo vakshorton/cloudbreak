@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.controller;
+package com.sequenceiq.cloudbreak.service.user;
 
 import javax.inject.Inject;
 
@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 
 @Service
 public class AuthenticatedUserService {

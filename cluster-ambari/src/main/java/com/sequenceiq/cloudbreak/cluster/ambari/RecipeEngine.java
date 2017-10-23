@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cluster.recipe;
+package com.sequenceiq.cloudbreak.cluster.ambari;
 
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SALT;
 
@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -26,20 +27,20 @@ import com.sequenceiq.cloudbreak.cluster.ClusterLifecycleEvent;
 import com.sequenceiq.cloudbreak.cluster.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.cluster.RecipeScript;
 import com.sequenceiq.cloudbreak.cluster.ambari.blueprint.BlueprintProcessor;
-import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
+import com.sequenceiq.cloudbreak.cluster.recipe.OrchestratorRecipeExecutor;
+import com.sequenceiq.cloudbreak.cluster.recipe.RecipeBuilder;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
 public class RecipeEngine {
-
-    public static final Set<String> DEFAULT_RECIPES =  Collections.unmodifiableSet(Sets.newHashSet("hdfs-home", "smartsense-capture-schedule"));
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeEngine.class);
 
@@ -55,43 +56,44 @@ public class RecipeEngine {
     @Inject
     private BlueprintProcessor blueprintProcessor;
 
-    public void executePreInstall(Stack stack, Set<HostGroup> hostGroups, OrchestratorType orchestratorType, boolean smartSenseIsConfigurable)
+    public void executePreInstall(Stack stack, Set<HostGroup> hostGroups, Optional<HostOrchestrator> orchestrator, boolean smartSenseIsConfigurable)
             throws CloudbreakException {
-        if (recipesSupportedOnOrchestrator(orchestratorType)) {
+        if (orchestrator.isPresent()) {
             addFsRecipes(stack, hostGroups);
             addSmartSenseRecipe(stack, hostGroups, smartSenseIsConfigurable);
             addContainerExecutorScripts(stack, hostGroups);
             boolean recipesFound = recipesFound(hostGroups);
             if (recipesFound) {
-                orchestratorRecipeExecutor.uploadRecipes(stack, hostGroups);
-                orchestratorRecipeExecutor.preInstall(stack);
+
+                orchestratorRecipeExecutor.uploadRecipes(stack, hostGroups, orchestrator.get());
+                orchestratorRecipeExecutor.preInstall(stack,orchestrator.get());
             }
         }
     }
 
-    public void executeUpscalePreInstall(Stack stack, HostGroup hostGroup, Set<HostGroup> hostGroups, OrchestratorType orchestratorType) throws CloudbreakException {
-        if (recipesSupportedOnOrchestrator(orchestratorType)) {
+    public void executeUpscalePreInstall(Stack stack, HostGroup hostGroup, Set<HostGroup> hostGroups, Optional<HostOrchestrator> orchestrator) throws CloudbreakException {
+        if (orchestrator.isPresent()) {
             Set<HostGroup> hgs = Collections.singleton(hostGroup);
             addFsRecipes(stack, hgs);
             boolean recipesFound = recipesFound(hgs);
             if (recipesFound) {
                 if (hostGroup.getConstraint().getInstanceGroup().getInstanceGroupType() == InstanceGroupType.GATEWAY) {
-                    orchestratorRecipeExecutor.uploadRecipes(stack, hostGroups);
+                    orchestratorRecipeExecutor.uploadRecipes(stack, hostGroups, orchestrator.get());
                 }
-                orchestratorRecipeExecutor.preInstall(stack);
+                orchestratorRecipeExecutor.preInstall(stack, orchestrator.get());
             }
         }
     }
 
-    public void executePostInstall(Stack stack, OrchestratorType orchestratorType) throws CloudbreakException {
-        if (recipesSupportedOnOrchestrator(orchestratorType)) {
-            orchestratorRecipeExecutor.postInstall(stack);
+    public void executePostInstall(Stack stack, Optional<HostOrchestrator> orchestrator) throws CloudbreakException {
+        if (orchestrator.isPresent()) {
+            orchestratorRecipeExecutor.postInstall(stack, orchestrator.get());
         }
     }
 
-    public void executeUpscalePostInstall(Stack stack, OrchestratorType orchestratorType) throws CloudbreakException {
-        if (recipesSupportedOnOrchestrator(orchestratorType)) {
-            orchestratorRecipeExecutor.postInstall(stack);
+    public void executeUpscalePostInstall(Stack stack, Optional<HostOrchestrator> orchestrator) throws CloudbreakException {
+        if (orchestrator.isPresent()) {
+            orchestratorRecipeExecutor.postInstall(stack, orchestrator.get());
         }
     }
 
@@ -212,9 +214,5 @@ public class RecipeEngine {
             }
         }
         return false;
-    }
-
-    private boolean recipesSupportedOnOrchestrator(OrchestratorType orchestrator) throws CloudbreakException {
-        return !orchestrator.containerOrchestrator();
     }
 }

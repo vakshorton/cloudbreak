@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.bootstrap.service;
+package com.sequenceiq.cloudbreak.cluster;
 
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 

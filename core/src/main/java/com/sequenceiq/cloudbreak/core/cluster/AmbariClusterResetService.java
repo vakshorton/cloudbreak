@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
+import static com.sequenceiq.cloudbreak.cluster.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 
 import java.util.Collections;
 import java.util.Set;
