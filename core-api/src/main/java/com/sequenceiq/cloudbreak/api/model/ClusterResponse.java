@@ -96,7 +96,7 @@ public class ClusterResponse implements JsonEntity {
     private CustomContainerResponse customContainers;
 
     @ApiModelProperty(ClusterModelDescription.AMBARI_STACK_DETAILS)
-    private AmbariStackDetailsJson ambariStackDetails;
+    private StackRepositoryResponse ambariStackDetails;
 
     @ApiModelProperty(ClusterModelDescription.AMBARI_REPO_DETAILS)
     private AmbariRepoDetailsJson ambariRepoDetailsJson;
@@ -318,11 +318,11 @@ public class ClusterResponse implements JsonEntity {
         this.customContainers = customContainers;
     }
 
-    public AmbariStackDetailsJson getAmbariStackDetails() {
+    public StackRepositoryResponse getAmbariStackDetails() {
         return ambariStackDetails;
     }
 
-    public void setAmbariStackDetails(AmbariStackDetailsJson ambariStackDetails) {
+    public void setAmbariStackDetails(StackRepositoryResponse ambariStackDetails) {
         this.ambariStackDetails = ambariStackDetails;
     }
 

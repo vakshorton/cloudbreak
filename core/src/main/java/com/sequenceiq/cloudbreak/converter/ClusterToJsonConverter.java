@@ -38,9 +38,11 @@ import com.sequenceiq.cloudbreak.api.model.HostGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.Port;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.StackRepositoryResponse;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
@@ -166,6 +168,11 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             if (ambariRepo != null) {
                 AmbariRepoDetailsJson ambariRepoDetailsJson = conversionService.convert(ambariRepo, AmbariRepoDetailsJson.class);
                 response.setAmbariRepoDetailsJson(ambariRepoDetailsJson);
+            }
+            StackRepoDetails stackRepoDetails = componentConfigProvider.getHDPRepo(clusterId);
+            if (stackRepoDetails != null) {
+                StackRepositoryResponse ambariRepoDetailsJson = conversionService.convert(stackRepoDetails, StackRepositoryResponse.class);
+                response.setAmbariStackDetails(ambariRepoDetailsJson);
             }
         } catch (RuntimeException e) {
             LOGGER.error("Failed to convert dynamic component.", e);
